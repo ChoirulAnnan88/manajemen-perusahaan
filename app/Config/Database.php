@@ -27,7 +27,7 @@ class Database extends Config
         'hostname'     => 'localhost',
         'username'     => 'root',
         'password'     => '',
-        'database'     => 'toko_online',
+        'database'     => 'manajemen_perusahaan', // UBAH INI
         'DBDriver'     => 'MySQLi',
         'DBPrefix'     => '',
         'pConnect'     => false,
@@ -43,39 +43,5 @@ class Database extends Config
         'numberNative' => false,
     ];
 
-    /**
-     * This database connection is used when running PHPUnit database tests.
-     */
-    public array $tests = [
-        'DSN'         => '',
-        'hostname'    => '127.0.0.1',
-        'username'    => '',
-        'password'    => '',
-        'database'    => ':memory:',
-        'DBDriver'    => 'SQLite3',
-        'DBPrefix'    => 'db_',
-        'pConnect'    => false,
-        'DBDebug'     => true,
-        'charset'     => 'utf8',
-        'DBCollat'    => 'utf8_general_ci',
-        'swapPre'     => '',
-        'encrypt'     => false,
-        'compress'    => false,
-        'strictOn'    => false,
-        'failover'    => [],
-        'port'        => 3306,
-        'foreignKeys' => true,
-        'busyTimeout' => 1000,
-        'numberNative' => false,
-    ];
-
-    public function __construct()
-    {
-        parent::__construct();
-
-        // Ensure that we always set the database group to 'default' if no other is specified.
-        if (! isset($this->defaultGroup)) {
-            $this->defaultGroup = 'default';
-        }
-    }
+    // ... sisanya tetap sama
 }

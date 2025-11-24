@@ -1,0 +1,48 @@
+// app/Database/Migrations/2024-01-01-000001_CreateDivisionsTable.php
+<?php
+
+namespace App\Database\Migrations;
+
+use CodeIgniter\Database\Migration;
+
+class CreateDivisionsTable extends Migration
+{
+    public function up()
+    {
+        $this->forge->addField([
+            'id' => [
+                'type' => 'INT',
+                'constraint' => 5,
+                'unsigned' => true,
+                'auto_increment' => true
+            ],
+            'division_name' => [
+                'type' => 'VARCHAR',
+                'constraint' => '100'
+            ],
+            'division_code' => [
+                'type' => 'VARCHAR',
+                'constraint' => '10'
+            ],
+            'description' => [
+                'type' => 'TEXT',
+                'null' => true
+            ],
+            'created_at' => [
+                'type' => 'DATETIME',
+                'null' => true
+            ],
+            'updated_at' => [
+                'type' => 'DATETIME',
+                'null' => true
+            ]
+        ]);
+        $this->forge->addKey('id', true);
+        $this->forge->createTable('divisions');
+    }
+
+    public function down()
+    {
+        $this->forge->dropTable('divisions');
+    }
+}
