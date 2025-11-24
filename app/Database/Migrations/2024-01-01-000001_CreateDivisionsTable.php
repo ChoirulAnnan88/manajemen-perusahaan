@@ -1,4 +1,3 @@
-// app/Database/Migrations/2024-01-01-000001_CreateDivisionsTable.php
 <?php
 
 namespace App\Database\Migrations;
