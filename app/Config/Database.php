@@ -43,5 +43,5 @@ class Database extends Config
         'numberNative' => false,
     ];
 
-    // ... sisanya tetap sama
+   
 }
