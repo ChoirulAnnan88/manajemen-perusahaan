@@ -1,47 +1,52 @@
-// app/Database/Seeds/DivisionSeeder.php
 <?php
 
 namespace App\Database\Seeds;
 
 use CodeIgniter\Database\Seeder;
 
-class DivisionSeeder extends Seeder
+class DivisiSeeder extends Seeder
 {
     public function run()
     {
         $data = [
             [
-                'division_name' => 'HRGA',
-                'division_code' => 'HRGA',
-                'description' => 'Human Resources & General Affairs'
+                'kode_divisi' => 'HRGA',
+                'nama_divisi' => 'Human Resources & General Affairs',
+                'deskripsi' => 'Mengelola sumber daya manusia dan urusan umum perusahaan',
+                'created_at' => date('Y-m-d H:i:s')
             ],
             [
-                'division_name' => 'HSE',
-                'division_code' => 'HSE', 
-                'description' => 'Health, Safety & Environment'
+                'kode_divisi' => 'HSE',
+                'nama_divisi' => 'Health, Safety & Environment', 
+                'deskripsi' => 'Menangani kesehatan, keselamatan, dan lingkungan kerja',
+                'created_at' => date('Y-m-d H:i:s')
             ],
             [
-                'division_name' => 'FINANCE ACCOUNTING',
-                'division_code' => 'FINACC',
-                'description' => 'Finance & Accounting'
+                'kode_divisi' => 'FINACC',
+                'nama_divisi' => 'Finance & Accounting',
+                'deskripsi' => 'Mengelola keuangan dan akuntansi perusahaan',
+                'created_at' => date('Y-m-d H:i:s')
             ],
             [
-                'division_name' => 'PPIC',
-                'division_code' => 'PPIC',
-                'description' => 'Production Planning & Inventory Control'
+                'kode_divisi' => 'PPIC',
+                'nama_divisi' => 'Production Planning & Inventory Control',
+                'deskripsi' => 'Perencanaan produksi dan pengendalian persediaan',
+                'created_at' => date('Y-m-d H:i:s')
             ],
             [
-                'division_name' => 'PRODUKSI',
-                'division_code' => 'PROD',
-                'description' => 'Production Department'
+                'kode_divisi' => 'PROD',
+                'nama_divisi' => 'Produksi',
+                'deskripsi' => 'Divisi produksi dan operasional manufacturing',
+                'created_at' => date('Y-m-d H:i:s')
             ],
             [
-                'division_name' => 'MARKETING',
-                'division_code' => 'MKT',
-                'description' => 'Marketing & Sales'
+                'kode_divisi' => 'MKT',
+                'nama_divisi' => 'Marketing',
+                'deskripsi' => 'Pemasaran dan penjualan produk perusahaan',
+                'created_at' => date('Y-m-d H:i:s')
             ]
         ];
 
-        $this->db->table('divisions')->insertBatch($data);
+        $this->db->table('divisi')->insertBatch($data);
     }
 }
