@@ -11,6 +11,7 @@ class Auth extends BaseController
     public function __construct()
     {
         $this->userModel = new UserModel();
+        helper(['form', 'url']);
     }
 
     public function login()
@@ -86,7 +87,6 @@ class Auth extends BaseController
             }
 
         } catch (\Exception $e) {
-            // Fallback jika database error
             return redirect()->back()->withInput()->with('error', 'Sistem sedang dalam perbaikan. Silakan coba lagi nanti.');
         }
     }
@@ -116,54 +116,83 @@ class Auth extends BaseController
     public function prosesBuatAkun()
     {
         // Validasi input
-        $rules = [
+        $validationRules = [
             'username' => 'required|min_length[3]|max_length[50]',
             'email' => 'required|valid_email',
-            'nama_lengkap' => 'required',
-            'divisi_id' => 'required',
+            'nama_lengkap' => 'required|min_length[2]',
+            'divisi_id' => 'required|numeric',
             'password' => 'required|min_length[6]',
             'confirm_password' => 'required|matches[password]'
         ];
 
-        if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        if (!$this->validate($validationRules)) {
+            $errors = $this->validator->getErrors();
+            return redirect()->back()->withInput()->with('errors', $errors);
         }
 
+        // Data dari form
+        $userData = [
+            'username' => $this->request->getPost('username'),
+            'email' => $this->request->getPost('email'),
+            'password' => $this->request->getPost('password'),
+            'nama_lengkap' => $this->request->getPost('nama_lengkap'),
+            'divisi_id' => $this->request->getPost('divisi_id'),
+            'role' => 'staff',
+            'is_active' => 1
+        ];
+
         try {
-            // Simpan data ke database
-            $userData = [
-                'username' => $this->request->getPost('username'),
-                'email' => $this->request->getPost('email'),
-                'password' => $this->request->getPost('password'),
-                'nama_lengkap' => $this->request->getPost('nama_lengkap'),
-                'divisi_id' => $this->request->getPost('divisi_id'),
-                'role' => 'staff',
-                'is_active' => true
-            ];
+            // Skip validation model untuk menghindari conflict
+            $this->userModel->skipValidation(true);
+            
+            // Gunakan insert() 
+            $result = $this->userModel->insert($userData);
+            
+            if ($result) {
+                $userId = $this->userModel->getInsertID();
+                
+                if ($userId) {
+                    // Auto login setelah buat akun
+                    $userWithDivision = $this->userModel->getUserWithDivision($userId);
 
-            // Simpan ke database
-            $this->userModel->save($userData);
+                    if ($userWithDivision) {
+                        session()->set([
+                            'isLoggedIn' => true,
+                            'userId' => $userWithDivision['id'],
+                            'username' => $userWithDivision['username'],
+                            'email' => $userWithDivision['email'],
+                            'nama_lengkap' => $userWithDivision['nama_lengkap'],
+                            'divisi_id' => $userWithDivision['divisi_id'],
+                            'nama_divisi' => $userWithDivision['nama_divisi'],
+                            'kode_divisi' => $userWithDivision['kode_divisi'],
+                            'role' => $userWithDivision['role']
+                        ]);
 
-            // Auto login setelah buat akun
-            $user = $this->userModel->getUserByUsername($userData['username']);
-            $userWithDivision = $this->userModel->getUserWithDivision($user['id']);
-
-            session()->set([
-                'isLoggedIn' => true,
-                'userId' => $userWithDivision['id'],
-                'username' => $userWithDivision['username'],
-                'email' => $userWithDivision['email'],
-                'nama_lengkap' => $userWithDivision['nama_lengkap'],
-                'divisi_id' => $userWithDivision['divisi_id'],
-                'nama_divisi' => $userWithDivision['nama_divisi'],
-                'kode_divisi' => $userWithDivision['kode_divisi'],
-                'role' => $userWithDivision['role']
-            ]);
-
-            return redirect()->to('/dashboard')->with('success', 'Akun berhasil dibuat! Selamat datang ' . $userData['nama_lengkap']);
+                        return redirect()->to('/dashboard')->with('success', 'Akun berhasil dibuat! Selamat datang ' . $userData['nama_lengkap']);
+                    } else {
+                        // Jika tidak bisa mendapatkan data divisi, tetap login dengan data basic
+                        $user = $this->userModel->find($userId);
+                        session()->set([
+                            'isLoggedIn' => true,
+                            'userId' => $user['id'],
+                            'username' => $user['username'],
+                            'email' => $user['email'],
+                            'nama_lengkap' => $user['nama_lengkap'],
+                            'divisi_id' => $user['divisi_id'],
+                            'role' => $user['role']
+                        ]);
+                        return redirect()->to('/dashboard')->with('success', 'Akun berhasil dibuat! Selamat datang ' . $userData['nama_lengkap']);
+                    }
+                } else {
+                    throw new \Exception('Gagal mendapatkan ID user setelah insert');
+                }
+            } else {
+                throw new \Exception('Insert user gagal');
+            }
 
         } catch (\Exception $e) {
-            return redirect()->back()->withInput()->with('error', 'Gagal membuat akun. Username atau email mungkin sudah digunakan.');
+            $errorMessage = 'Gagal membuat akun: ' . $e->getMessage();
+            return redirect()->back()->withInput()->with('error', $errorMessage);
         }
     }
 
