@@ -16,7 +16,6 @@ class Auth extends BaseController
 
     public function login()
     {
-        // Jika sudah login, redirect ke dashboard
         if (session()->get('isLoggedIn')) {
             return redirect()->to('/dashboard');
         }
@@ -30,7 +29,6 @@ class Auth extends BaseController
 
     public function attemptLogin()
     {
-        // Validasi input
         $rules = [
             'username' => 'required',
             'password' => 'required'
@@ -44,27 +42,26 @@ class Auth extends BaseController
         $password = $this->request->getPost('password');
 
         try {
-            // Cari user by username
             $user = $this->userModel->getUserByUsername($username);
 
             if (!$user) {
                 return redirect()->back()->withInput()->with('error', 'Username tidak ditemukan');
             }
 
-            // Cek password
-            if (!password_verify($password, $user['password'])) {
+            if ($password !== $user['password']) {
                 return redirect()->back()->withInput()->with('error', 'Password salah');
             }
 
-            // Cek status aktif
+            if (empty($user['password'])) {
+                return redirect()->back()->withInput()->with('error', 'Akun tidak valid. Silakan buat akun baru.');
+            }
+
             if (!$user['is_active']) {
                 return redirect()->back()->withInput()->with('error', 'Akun tidak aktif');
             }
 
-            // Update last login
             $this->userModel->update($user['id'], ['last_login' => date('Y-m-d H:i:s')]);
 
-            // Set session
             $userData = $this->userModel->getUserWithDivision($user['id']);
             
             session()->set([
@@ -79,11 +76,10 @@ class Auth extends BaseController
                 'role' => $userData['role']
             ]);
 
-            // Redirect berdasarkan role
-            if ($userData['role'] === 'admin') {
-                return redirect()->to('/dashboard')->with('success', 'Selamat datang Administrator!');
+            if ($userData['role'] === 'manager') {
+                return redirect()->to('/dashboard')->with('success', 'Selamat datang Manager!');
             } else {
-                return redirect()->to('/home/division/' . strtolower($userData['kode_divisi']))->with('success', 'Selamat datang di divisi ' . $userData['nama_divisi']);
+                return redirect()->to('/dashboard')->with('success', 'Selamat datang di divisi ' . $userData['nama_divisi']);
             }
 
         } catch (\Exception $e) {
@@ -93,7 +89,6 @@ class Auth extends BaseController
 
     public function buatAkun()
     {
-        // Jika sudah login, redirect ke dashboard
         if (session()->get('isLoggedIn')) {
             return redirect()->to('/dashboard');
         }
@@ -107,6 +102,11 @@ class Auth extends BaseController
                 4 => 'PPIC - Production Planning & Inventory Control',
                 5 => 'PRODUKSI - Production Department',
                 6 => 'MARKETING - Marketing & Sales'
+            ],
+            'roles' => [
+                'manager' => 'Manager',
+                'staff' => 'Staff', 
+                'operator' => 'Operator'
             ]
         ];
 
@@ -115,12 +115,12 @@ class Auth extends BaseController
 
     public function prosesBuatAkun()
     {
-        // Validasi input
         $validationRules = [
             'username' => 'required|min_length[3]|max_length[50]',
             'email' => 'required|valid_email',
             'nama_lengkap' => 'required|min_length[2]',
             'divisi_id' => 'required|numeric',
+            'role' => 'required|in_list[manager,staff,operator]',
             'password' => 'required|min_length[6]',
             'confirm_password' => 'required|matches[password]'
         ];
@@ -130,29 +130,24 @@ class Auth extends BaseController
             return redirect()->back()->withInput()->with('errors', $errors);
         }
 
-        // Data dari form
         $userData = [
             'username' => $this->request->getPost('username'),
             'email' => $this->request->getPost('email'),
             'password' => $this->request->getPost('password'),
             'nama_lengkap' => $this->request->getPost('nama_lengkap'),
             'divisi_id' => $this->request->getPost('divisi_id'),
-            'role' => 'staff',
+            'role' => $this->request->getPost('role'),
             'is_active' => 1
         ];
 
         try {
-            // Skip validation model untuk menghindari conflict
             $this->userModel->skipValidation(true);
-            
-            // Gunakan insert() 
             $result = $this->userModel->insert($userData);
             
             if ($result) {
                 $userId = $this->userModel->getInsertID();
                 
                 if ($userId) {
-                    // Auto login setelah buat akun
                     $userWithDivision = $this->userModel->getUserWithDivision($userId);
 
                     if ($userWithDivision) {
@@ -170,7 +165,6 @@ class Auth extends BaseController
 
                         return redirect()->to('/dashboard')->with('success', 'Akun berhasil dibuat! Selamat datang ' . $userData['nama_lengkap']);
                     } else {
-                        // Jika tidak bisa mendapatkan data divisi, tetap login dengan data basic
                         $user = $this->userModel->find($userId);
                         session()->set([
                             'isLoggedIn' => true,

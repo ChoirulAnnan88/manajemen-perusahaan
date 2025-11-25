@@ -18,10 +18,67 @@ $routes->post('auth/proses-buat-akun', 'Auth::prosesBuatAkun');
 $routes->get('auth/logout', 'Auth::logout');
 $routes->get('auth/profile', 'Auth::profile');
 
-// Dashboard Route (protected)
-$routes->get('dashboard', 'Auth::profile');
+// Dashboard Route
+$routes->get('dashboard', 'Dashboard::index');
 
-// Catch all - 404 (FIXED VERSION)
+// HRGA Routes
+$routes->group('hrga', ['filter' => 'divisionAuth'], function($routes) {
+    $routes->get('/', 'HrgaController::index');
+    $routes->get('karyawan', 'HrgaController::karyawan');
+    $routes->get('absensi', 'HrgaController::absensi');
+    $routes->get('penggajian', 'HrgaController::penggajian');
+    $routes->get('penilaian', 'HrgaController::penilaian');
+    $routes->get('inventaris', 'HrgaController::inventaris');
+    $routes->get('perawatan', 'HrgaController::perawatan');
+    $routes->get('perizinan', 'HrgaController::perizinan');
+});
+
+// HSE Routes  
+$routes->group('hse', ['filter' => 'divisionAuth'], function($routes) {
+    $routes->get('/', 'HseController::index');
+    $routes->get('insiden', 'HseController::insiden');
+    $routes->get('risiko', 'HseController::risiko');
+    $routes->get('pelatihan', 'HseController::pelatihan');
+    $routes->get('lingkungan', 'HseController::lingkungan');
+});
+
+// Finance Routes
+$routes->group('finance', ['filter' => 'divisionAuth'], function($routes) {
+    $routes->get('/', 'FinanceController::index');
+    $routes->get('transaksi', 'FinanceController::transaksi');
+    $routes->get('anggaran', 'FinanceController::anggaran');
+    $routes->get('pajak', 'FinanceController::pajak');
+    $routes->get('aset', 'FinanceController::aset');
+});
+
+// PPIC Routes
+$routes->group('ppic', ['filter' => 'divisionAuth'], function($routes) {
+    $routes->get('/', 'PpicController::index');
+    $routes->get('inventori', 'PpicController::inventori');
+    $routes->get('produksi', 'PpicController::produksi');
+    $routes->get('material', 'PpicController::material');
+    $routes->get('pemasok', 'PpicController::pemasok');
+    $routes->get('pembeli', 'PpicController::pembeli');
+});
+
+// Produksi Routes
+$routes->group('produksi', ['filter' => 'divisionAuth'], function($routes) {
+    $routes->get('/', 'ProduksiController::index');
+    $routes->get('hasil', 'ProduksiController::hasil');
+    $routes->get('alat', 'ProduksiController::alat');
+    $routes->get('operator', 'ProduksiController::operator');
+});
+
+// Marketing Routes
+$routes->group('marketing', ['filter' => 'divisionAuth'], function($routes) {
+    $routes->get('/', 'MarketingController::index');
+    $routes->get('pelanggan', 'MarketingController::pelanggan');
+    $routes->get('penjualan', 'MarketingController::penjualan');
+    $routes->get('kampanye', 'MarketingController::kampanye');
+    $routes->get('riset', 'MarketingController::riset');
+});
+
+// Catch all - 404
 $routes->set404Override(function() {
     $html = '<!DOCTYPE html>
     <html>
@@ -39,74 +96,9 @@ $routes->set404Override(function() {
         <p>Halaman yang Anda cari tidak ditemukan.</p>
         <a href="/">Kembali ke Home</a> | 
         <a href="/auth/login">Pergi ke Login</a> | 
-        <a href="/auth/buat-akun">Buat Akun Baru</a>
+        <a href="/dashboard">Dashboard</a>
     </body>
     </html>';
     
     return $html;
 });
-
-// Error handler untuk menampilkan error sebenarnya
-if (!function_exists('show_error_details')) {
-    function show_error_details($error) {
-        $html = '<!DOCTYPE html>
-        <html>
-        <head>
-            <title>Error - Manajemen Perusahaan</title>
-            <style>
-                body { font-family: Arial, sans-serif; padding: 20px; }
-                .error-box { 
-                    background: #f8f9fa; 
-                    border: 1px solid #dee2e6; 
-                    border-radius: 5px; 
-                    padding: 20px; 
-                    max-width: 800px; 
-                    margin: 0 auto; 
-                }
-                .error-header { 
-                    background: #d9534f; 
-                    color: white; 
-                    padding: 15px; 
-                    border-radius: 5px 5px 0 0; 
-                    margin: -20px -20px 20px -20px;
-                }
-                a { 
-                    display: inline-block; 
-                    padding: 10px 20px; 
-                    background: #007bff; 
-                    color: white; 
-                    text-decoration: none; 
-                    border-radius: 5px; 
-                    margin: 10px 5px; 
-                }
-                .error-details {
-                    background: #fff3cd;
-                    border: 1px solid #ffeaa7;
-                    padding: 15px;
-                    border-radius: 5px;
-                    margin: 15px 0;
-                    font-family: monospace;
-                    white-space: pre-wrap;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="error-box">
-                <div class="error-header">
-                    <h1>⚠️ Terjadi Kesalahan Sistem</h1>
-                </div>
-                <p><strong>Pesan Error:</strong></p>
-                <div class="error-details">' . htmlspecialchars($error) . '</div>
-                <p>Silakan coba lagi atau hubungi administrator.</p>
-                <div>
-                    <a href="/">Kembali ke Home</a>
-                    <a href="/auth/login">Pergi ke Login</a>
-                    <a href="/auth/buat-akun">Buat Akun Baru</a>
-                </div>
-            </div>
-        </body>
-        </html>';
-        
-        return $html;
-    }
-}

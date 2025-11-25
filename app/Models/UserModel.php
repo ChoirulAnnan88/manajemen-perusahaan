@@ -21,19 +21,15 @@ class UserModel extends Model
     protected $updatedField  = 'updated_at';
 
     // Validation
-    protected $validationRules      = [
-        'username' => 'required|min_length[3]|max_length[50]|is_unique[users.username]',
-        'email'    => 'required|valid_email|is_unique[users.email]',
-        'password' => 'required|min_length[8]',
-    ];
+    protected $validationRules      = [];
     protected $validationMessages   = [];
-    protected $skipValidation       = false;
+    protected $skipValidation       = true;
     protected $cleanValidationRules = true;
 
     // Callbacks
     protected $allowCallbacks = true;
-    protected $beforeInsert   = ['hashPassword'];
-    protected $beforeUpdate   = ['hashPassword'];
+    //protected $beforeInsert   = ['hashPassword'];
+    //protected $beforeUpdate   = ['hashPassword'];
 
     protected function hashPassword(array $data)
     {
@@ -51,7 +47,7 @@ class UserModel extends Model
     public function getUserWithDivision($userId)
     {
         return $this->select('users.*, divisi.nama_divisi, divisi.kode_divisi')
-                    ->join('divisi', 'divisi.id = users.divisi_id')
+                    ->join('divisi', 'divisi.id = users.divisi_id', 'left')
                     ->where('users.id', $userId)
                     ->first();
     }

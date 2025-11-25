@@ -5,6 +5,11 @@ class Home extends BaseController
 {
     public function index()
     {
+        // Jika sudah login, redirect ke dashboard
+        if (session()->get('isLoggedIn')) {
+            return redirect()->to('/dashboard');
+        }
+
         // Coba ambil data dari database, jika error tetap tampilkan data default
         try {
             $db = \Config\Database::connect();
@@ -38,15 +43,20 @@ class Home extends BaseController
             'divisions' => $divisions
         ];
         
-        return view('dashboard', $data);
+        return view('home', $data);
     }
 
     public function division($division)
     {
+        // Jika sudah login, redirect ke dashboard divisi
+        if (session()->get('isLoggedIn')) {
+            return redirect()->to('/' . $division);
+        }
+
         $divisionNames = [
             'hrga' => 'HRGA - Human Resources & General Affairs',
             'hse' => 'HSE - Health, Safety & Environment',
-            'finance' => 'FINANCE ACCOUNTING - Finance & Accounting',
+            'finance' => 'FINANCE - Finance & Accounting',
             'ppic' => 'PPIC - Production Planning & Inventory Control',
             'produksi' => 'PRODUKSI - Production Department',
             'marketing' => 'MARKETING - Marketing & Sales'
@@ -77,7 +87,7 @@ class Home extends BaseController
                 'color' => 'success'
             ],
             'finance' => [
-                'code' => 'FINANCE ACCOUNTING',
+                'code' => 'FINANCE',
                 'name' => 'Finance & Accounting',
                 'color' => 'info'
             ],
@@ -107,15 +117,29 @@ class Home extends BaseController
         $colors = [
             'HRGA' => 'primary',
             'HSE' => 'success', 
-            'FINACC' => 'info',
+            'FINANCE' => 'info',
             'PPIC' => 'warning',
-            'PROD' => 'danger',
-            'MKT' => 'dark',
-            'FINANCE ACCOUNTING' => 'info',
             'PRODUKSI' => 'danger',
             'MARKETING' => 'dark'
         ];
 
         return $colors[$kodeDivisi] ?? 'secondary';
+    }
+
+    /**
+     * Get icon for division (untuk digunakan di view)
+     */
+    private function getDivisionIcon($division)
+    {
+        $icons = [
+            'hrga' => 'users',
+            'hse' => 'shield-alt',
+            'finance' => 'chart-line',
+            'ppic' => 'boxes',
+            'produksi' => 'industry',
+            'marketing' => 'bullhorn'
+        ];
+
+        return $icons[$division] ?? 'building';
     }
 }
