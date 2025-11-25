@@ -1,0 +1,12 @@
+<?php
+
+if (!defined('WRITEPATH')) {
+    define('WRITEPATH', ROOTPATH . 'writable' . DIRECTORY_SEPARATOR);
+}
+
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+
+defined('SHOW_DEBUG_BACKTRACE') || define('SHOW_DEBUG_BACKTRACE', true);
+defined('CI_DEBUG') || define('CI_DEBUG', true);
