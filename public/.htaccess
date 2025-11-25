@@ -1,7 +1,11 @@
 RewriteEngine On
 
 # Uncomment if CI4 is in subfolder
+<<<<<<< HEAD
 RewriteBase /manajemen_perusahaan/public/
+=======
+RewriteBase /toko-online/public/
+>>>>>>> 3bd40ba37e89111e0c3aade902d5fa80c41594f8
 
 # Redirect Trailing Slashes If Not A Folder...
 RewriteCond %{REQUEST_FILENAME} !-d

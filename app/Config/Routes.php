@@ -8,7 +8,11 @@ use CodeIgniter\Router\RouteCollection;
 
 // Public Routes
 $routes->get('/', 'Home::index');
+<<<<<<< HEAD
 $routes->get('division/(:segment)', 'Home::division/$1');
+=======
+$routes->get('home/division/(:segment)', 'Home::division/$1');
+>>>>>>> 3bd40ba37e89111e0c3aade902d5fa80c41594f8
 
 // Auth Routes
 $routes->get('auth/login', 'Auth::login');
