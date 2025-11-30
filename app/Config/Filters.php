@@ -20,7 +20,7 @@ class Filters extends BaseFilters
      * make reading things nicer and simpler.
      */
     public array $aliases = [
-        'csrf'          => CSRF::class, // ✅ UNCOMMENT UNTUK FORM PROTECTION
+        'csrf'          => CSRF::class,
         'toolbar'       => DebugToolbar::class,
         'honeypot'      => Honeypot::class,
         'invalidchars'  => InvalidChars::class,
@@ -29,7 +29,7 @@ class Filters extends BaseFilters
         'forcehttps'    => ForceHTTPS::class,
         'pagecache'     => PageCache::class,
         'performance'   => PerformanceMetrics::class,
-        'divisionAuth'  => \App\Filters\DivisionFilter::class, // ✅ TAMBAH INI
+        'divisionAuth'  => \App\Filters\DivisionFilter::class,
     ];
 
     /**
@@ -50,8 +50,7 @@ class Filters extends BaseFilters
      */
     public array $globals = [
         'before' => [
-            'csrf', // ✅ UNCOMMENT UNTUK FORM PROTECTION
-            // 'honeypot',
+            // 'csrf', // Nonaktifkan sementara untuk testing
         ],
         'after' => [
             'toolbar',
@@ -68,16 +67,5 @@ class Filters extends BaseFilters
      * List of filter aliases that should run on any
      * before or after URI patterns.
      */
-    public array $filters = [
-        'divisionAuth' => [ // ✅ TAMBAH INI
-            'before' => [
-                'hrga/*',
-                'hse/*',
-                'finance/*',
-                'ppic/*',
-                'produksi/*',
-                'marketing/*'
-            ]
-        ]
-    ];
+    public array $filters = [];
 }

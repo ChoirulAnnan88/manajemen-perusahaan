@@ -1,48 +1,72 @@
 <?php
-namespace App\Filters;
 
-use CodeIgniter\Filters\FilterInterface;
-use CodeIgniter\HTTP\RequestInterface;
-use CodeIgniter\HTTP\ResponseInterface;
+namespace Config;
 
-class DivisionFilter implements FilterInterface
+use CodeIgniter\Config\Filters as BaseFilters;
+use CodeIgniter\Filters\Cors;
+use CodeIgniter\Filters\CSRF;
+use CodeIgniter\Filters\DebugToolbar;
+use CodeIgniter\Filters\ForceHTTPS;
+use CodeIgniter\Filters\Honeypot;
+use CodeIgniter\Filters\InvalidChars;
+use CodeIgniter\Filters\PageCache;
+use CodeIgniter\Filters\PerformanceMetrics;
+use CodeIgniter\Filters\SecureHeaders;
+
+class Filters extends BaseFilters
 {
-    public function before(RequestInterface $request, $arguments = null)
-    {
-        $session = session();
-        
-        if (!$session->get('isLoggedIn')) {
-            return redirect()->to('/auth/login');
-        }
+    /**
+     * Configures aliases for Filter classes to
+     * make reading things nicer and simpler.
+     */
+    public array $aliases = [
+        'csrf'          => CSRF::class,
+        'toolbar'       => DebugToolbar::class,
+        'honeypot'      => Honeypot::class,
+        'invalidchars'  => InvalidChars::class,
+        'secureheaders' => SecureHeaders::class,
+        'cors'          => Cors::class,
+        'forcehttps'    => ForceHTTPS::class,
+        'pagecache'     => PageCache::class,
+        'performance'   => PerformanceMetrics::class,
+        'divisionAuth'  => \App\Filters\DivisionFilter::class,
+        'auth'          => \App\Filters\AuthFilter::class, // ✅ PASTIKAN INI ADA
+    ];
 
-        $userRole = $session->get('role');
-        $userDivisi = $session->get('divisi_id');
-        $currentURI = $request->getUri()->getPath();
+    /**
+     * List of special required filters.
+     */
+    public array $required = [
+        'before' => [
+            // 'forcehttps',
+        ],
+        'after' => [
+            'toolbar',
+        ],
+    ];
 
-        // Manager bisa akses semua
-        if ($userRole === 'manager') {
-            return;
-        }
+    /**
+     * List of filter aliases that are always
+     * applied before and after every request.
+     */
+    public array $globals = [
+        'before' => [
+            // 'csrf', // Nonaktifkan sementara untuk testing
+        ],
+        'after' => [
+            'toolbar',
+        ],
+    ];
 
-        // Staff dan Operator hanya bisa akses divisi mereka
-        $allowedDivisions = [
-            'hrga' => 1,
-            'hse' => 2, 
-            'finance' => 3,
-            'ppic' => 4,
-            'produksi' => 5,
-            'marketing' => 6
-        ];
+    /**
+     * List of filter aliases that works on a
+     * particular HTTP method (GET, POST, etc.).
+     */
+    public array $methods = [];
 
-        foreach ($allowedDivisions as $division => $divisiId) {
-            if (strpos($currentURI, $division) !== false && $userDivisi != $divisiId) {
-                return redirect()->to('/dashboard')->with('error', 'Anda tidak memiliki akses ke divisi ' . ucfirst($division));
-            }
-        }
-    }
-
-    public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
-    {
-        // Do something here
-    }
+    /**
+     * List of filter aliases that should run on any
+     * before or after URI patterns.
+     */
+    public array $filters = [];
 }

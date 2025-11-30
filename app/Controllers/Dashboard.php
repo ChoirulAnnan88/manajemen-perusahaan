@@ -29,7 +29,8 @@ class Dashboard extends BaseController
             'menu' => $menu
         ];
 
-        return view('dashboard/index', $data);
+        // FIX: Gunakan view dashboard yang standalone, bukan extend layout
+        return view('dashboard', $data);
     }
 
     private function getUserMenu($role, $divisiId)

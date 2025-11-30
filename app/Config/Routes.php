@@ -21,20 +21,59 @@ $routes->get('auth/profile', 'Auth::profile');
 // Dashboard Route
 $routes->get('dashboard', 'Dashboard::index');
 
-// HRGA Routes
-$routes->group('hrga', ['filter' => 'divisionAuth'], function($routes) {
+// ========== PERBAIKAN UTAMA: TAMBAHKAN ROUTE STANDALONE UNTUK HRGA ==========
+$routes->get('hrga', 'HrgaController::index');
+$routes->get('hrga/(:any)', 'HrgaController::index');
+
+// Debug Routes
+$routes->get('debug/hrga', 'DebugController::hrga');
+$routes->get('debug/routes', 'DebugController::routes');
+
+// HRGA Routes Group - PERBAIKI DENGAN NAMESPACE
+$routes->group('hrga', ['namespace' => 'App\Controllers'], function($routes) {
     $routes->get('/', 'HrgaController::index');
+    
+    // Karyawan Routes
     $routes->get('karyawan', 'HrgaController::karyawan');
+    $routes->get('karyawan/tambah', 'HrgaController::tambahKaryawan');
+    $routes->post('karyawan/simpan', 'HrgaController::simpanKaryawan');
+    $routes->get('karyawan/edit/(:num)', 'HrgaController::editKaryawan/$1');
+    $routes->post('karyawan/update/(:num)', 'HrgaController::updateKaryawan/$1');
+    $routes->get('karyawan/detail/(:num)', 'HrgaController::detailKaryawan/$1');
+    $routes->get('karyawan/hapus/(:num)', 'HrgaController::hapusKaryawan/$1');
+    
+    // Absensi Routes
     $routes->get('absensi', 'HrgaController::absensi');
+    $routes->post('absensi/simpan', 'HrgaController::simpanAbsensi');
+    $routes->get('absensi/riwayat', 'HrgaController::riwayatAbsensi');
+    
+    // Penggajian Routes
     $routes->get('penggajian', 'HrgaController::penggajian');
+    $routes->get('penggajian/generate', 'HrgaController::generatePenggajian');
+    $routes->post('penggajian/proses', 'HrgaController::prosesPenggajian');
+    $routes->get('penggajian/slip/(:num)', 'HrgaController::slipGaji/$1');
+    
+    // Penilaian Routes
     $routes->get('penilaian', 'HrgaController::penilaian');
+    $routes->post('penilaian/simpan', 'HrgaController::simpanPenilaian');
+    
+    // Inventaris Routes
     $routes->get('inventaris', 'HrgaController::inventaris');
+    $routes->post('inventaris/simpan', 'HrgaController::simpanInventaris');
+    
+    // Perawatan Routes
     $routes->get('perawatan', 'HrgaController::perawatan');
+    $routes->post('perawatan/simpan', 'HrgaController::simpanPerawatan');
+    
+    // Perizinan Routes
     $routes->get('perizinan', 'HrgaController::perizinan');
+    $routes->post('perizinan/ajukan', 'HrgaController::ajukanPerizinan');
+    $routes->get('perizinan/approve/(:num)', 'HrgaController::approvePerizinan/$1');
+    $routes->get('perizinan/reject/(:num)', 'HrgaController::rejectPerizinan/$1');
 });
 
-// HSE Routes  
-$routes->group('hse', ['filter' => 'divisionAuth'], function($routes) {
+// HSE Routes
+$routes->group('hse', ['namespace' => 'App\Controllers'], function($routes) {
     $routes->get('/', 'HseController::index');
     $routes->get('insiden', 'HseController::insiden');
     $routes->get('risiko', 'HseController::risiko');
@@ -43,7 +82,7 @@ $routes->group('hse', ['filter' => 'divisionAuth'], function($routes) {
 });
 
 // Finance Routes
-$routes->group('finance', ['filter' => 'divisionAuth'], function($routes) {
+$routes->group('finance', ['namespace' => 'App\Controllers'], function($routes) {
     $routes->get('/', 'FinanceController::index');
     $routes->get('transaksi', 'FinanceController::transaksi');
     $routes->get('anggaran', 'FinanceController::anggaran');
@@ -52,7 +91,7 @@ $routes->group('finance', ['filter' => 'divisionAuth'], function($routes) {
 });
 
 // PPIC Routes
-$routes->group('ppic', ['filter' => 'divisionAuth'], function($routes) {
+$routes->group('ppic', ['namespace' => 'App\Controllers'], function($routes) {
     $routes->get('/', 'PpicController::index');
     $routes->get('inventori', 'PpicController::inventori');
     $routes->get('produksi', 'PpicController::produksi');
@@ -62,7 +101,7 @@ $routes->group('ppic', ['filter' => 'divisionAuth'], function($routes) {
 });
 
 // Produksi Routes
-$routes->group('produksi', ['filter' => 'divisionAuth'], function($routes) {
+$routes->group('produksi', ['namespace' => 'App\Controllers'], function($routes) {
     $routes->get('/', 'ProduksiController::index');
     $routes->get('hasil', 'ProduksiController::hasil');
     $routes->get('alat', 'ProduksiController::alat');
@@ -70,12 +109,35 @@ $routes->group('produksi', ['filter' => 'divisionAuth'], function($routes) {
 });
 
 // Marketing Routes
-$routes->group('marketing', ['filter' => 'divisionAuth'], function($routes) {
+$routes->group('marketing', ['namespace' => 'App\Controllers'], function($routes) {
     $routes->get('/', 'MarketingController::index');
     $routes->get('pelanggan', 'MarketingController::pelanggan');
     $routes->get('penjualan', 'MarketingController::penjualan');
     $routes->get('kampanye', 'MarketingController::kampanye');
     $routes->get('riset', 'MarketingController::riset');
+});
+
+// ========== ROUTE DEBUG ==========
+$routes->get('debug-routes', function() {
+    echo "<h1>Debug Routes</h1>";
+    echo "Current URL: " . current_url() . "<br>";
+    echo "Base URL: " . base_url() . "<br>";
+    
+    // Test HRGA Controller
+    if (class_exists('App\Controllers\HrgaController')) {
+        echo "✓ HrgaController exists<br>";
+    } else {
+        echo "✗ HrgaController NOT FOUND<br>";
+    }
+    
+    // Test method
+    if (method_exists('App\Controllers\HrgaController', 'index')) {
+        echo "✓ HrgaController::index exists<br>";
+    } else {
+        echo "✗ HrgaController::index NOT FOUND<br>";
+    }
+    
+    die();
 });
 
 // Catch all - 404
@@ -94,9 +156,9 @@ $routes->set404Override(function() {
     <body>
         <h1>404 - Halaman Tidak Ditemukan</h1>
         <p>Halaman yang Anda cari tidak ditemukan.</p>
-        <a href="/">Kembali ke Home</a> | 
-        <a href="/auth/login">Pergi ke Login</a> | 
-        <a href="/dashboard">Dashboard</a>
+        <a href="' . base_url() . '">Kembali ke Home</a> | 
+        <a href="' . base_url('auth/login') . '">Pergi ke Login</a> | 
+        <a href="' . base_url('dashboard') . '">Dashboard</a>
     </body>
     </html>';
     
