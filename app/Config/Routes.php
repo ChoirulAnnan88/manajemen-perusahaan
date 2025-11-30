@@ -22,12 +22,12 @@ $routes->get('auth/profile', 'Auth::profile');
 $routes->get('dashboard', 'Dashboard::index');
 
 // ========== PERBAIKAN UTAMA: TAMBAHKAN ROUTE STANDALONE UNTUK HRGA ==========
-$routes->get('hrga', 'HrgaController::index');
-$routes->get('hrga/(:any)', 'HrgaController::index');
+//$routes->get('hrga', 'HrgaController::index');
+//$routes->get('hrga/(:any)', 'HrgaController::index');
 
 // Debug Routes
-$routes->get('debug/hrga', 'DebugController::hrga');
-$routes->get('debug/routes', 'DebugController::routes');
+//$routes->get('debug/hrga', 'DebugController::hrga');
+//$routes->get('debug/routes', 'DebugController::routes');
 
 // HRGA Routes Group - PERBAIKI DENGAN NAMESPACE
 $routes->group('hrga', ['namespace' => 'App\Controllers'], function($routes) {
