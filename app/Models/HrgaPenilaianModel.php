@@ -12,7 +12,8 @@ class HrgaPenilaianModel extends Model
         'nilai_kerjasama', 'nilai_total', 'catatan', 'created_at'
     ];
     
-    protected $useTimestamps = true;
+    // HAPUS useTimestamps karena tabel tidak ada updated_at
+    protected $useTimestamps = false;
     protected $createdField = 'created_at';
     protected $dateFormat = 'datetime';
     

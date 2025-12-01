@@ -12,7 +12,8 @@ class HrgaAbsensiModel extends Model
         'status', 'keterangan', 'created_at'
     ];
     
-    protected $useTimestamps = true;
+    // HAPUS useTimestamps karena tabel tidak ada updated_at
+    protected $useTimestamps = false;
     protected $createdField = 'created_at';
     protected $dateFormat = 'datetime';
     
