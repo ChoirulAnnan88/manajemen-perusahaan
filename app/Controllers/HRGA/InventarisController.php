@@ -20,6 +20,7 @@ class InventarisController extends BaseController
             'title' => 'Inventaris General',
             'inventaris' => $this->inventarisModel->getAllInventaris()
         ];
+        // PERBAIKAN: ganti inventaris_index menjadi inventaris
         return view('hrga/inventaris', $data);
     }
 
@@ -34,10 +35,10 @@ class InventarisController extends BaseController
             return redirect()->to('/hrga/inventaris')->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        $kode_barang = 'INV-' . date('Ymd') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+        $kode_inventaris = 'INV-' . date('Ymd') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
 
         $this->inventarisModel->save([
-            'kode_barang' => $kode_barang,
+            'kode_inventaris' => $kode_inventaris,
             'nama_barang' => $this->request->getPost('nama_barang'),
             'kategori' => $this->request->getPost('kategori'),
             'jumlah' => $this->request->getPost('jumlah'),

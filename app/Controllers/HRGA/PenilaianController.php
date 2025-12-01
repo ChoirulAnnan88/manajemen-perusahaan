@@ -24,6 +24,7 @@ class PenilaianController extends BaseController
             'penilaian' => $this->penilaianModel->getAllWithKaryawan(),
             'karyawan' => $this->karyawanModel->getAllKaryawan()
         ];
+        // PERBAIKAN: ganti penilaian_index menjadi penilaian
         return view('hrga/penilaian', $data);
     }
 
@@ -47,10 +48,10 @@ class PenilaianController extends BaseController
         $this->penilaianModel->save([
             'karyawan_id' => $this->request->getPost('karyawan_id'),
             'periode' => $this->request->getPost('periode'),
-            'produktivitas' => $nilai_produktivitas,
-            'kedisiplinan' => $nilai_kedisiplinan,
-            'kerjasama' => $nilai_kerjasama,
-            'total_nilai' => $nilai_total,
+            'nilai_produktivitas' => $nilai_produktivitas,
+            'nilai_kedisiplinan' => $nilai_kedisiplinan,
+            'nilai_kerjasama' => $nilai_kerjasama,
+            'nilai_total' => $nilai_total,
             'catatan' => $this->request->getPost('catatan'),
             'created_at' => date('Y-m-d H:i:s')
         ]);

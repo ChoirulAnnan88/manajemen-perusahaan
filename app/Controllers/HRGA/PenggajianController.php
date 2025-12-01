@@ -28,6 +28,7 @@ class PenggajianController extends BaseController
             'bulan' => $bulan,
             'tahun' => $tahun
         ];
+        // PERBAIKAN: ganti penggajian_index menjadi penggajian
         return view('hrga/penggajian', $data);
     }
 
@@ -62,8 +63,7 @@ class PenggajianController extends BaseController
 
                 $this->penggajianModel->save([
                     'karyawan_id' => $karyawan_id,
-                    'bulan' => $bulan,
-                    'tahun' => $tahun,
+                    'bulan_tahun' => $tahun . '-' . $bulan . '-01',
                     'gaji_pokok' => $karyawan['gaji_pokok'],
                     'tunjangan' => $tunjangan,
                     'potongan' => $potongan,

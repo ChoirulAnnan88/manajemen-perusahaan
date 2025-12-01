@@ -25,6 +25,7 @@ class AbsensiController extends BaseController
             'karyawan' => $this->karyawanModel->getAllKaryawan(),
             'isManager' => true
         ];
+        // PERBAIKAN: ganti absensi_index menjadi absensi
         return view('hrga/absensi', $data);
     }
 

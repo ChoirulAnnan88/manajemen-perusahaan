@@ -6,17 +6,20 @@ use CodeIgniter\Model;
 
 class PenilaianModel extends Model
 {
-    protected $table = 'penilaian_kinerja';
+    protected $table = 'hrga_penilaian';
     protected $primaryKey = 'id';
-    protected $allowedFields = ['karyawan_id', 'periode', 'produktivitas', 'kedisiplinan', 'kerjasama', 'total_nilai', 'catatan', 'created_at'];
-    protected $useTimestamps = false;
+    protected $allowedFields = [
+        'karyawan_id', 'periode', 'nilai_produktivitas', 'nilai_kedisiplinan',
+        'nilai_kerjasama', 'nilai_total', 'catatan'
+    ];
+    protected $useTimestamps = true;
+    protected $createdField = 'created_at';
 
     public function getAllWithKaryawan()
     {
-        return $this->db->table('penilaian_kinerja p')
-            ->select('p.*, k.nip, k.nama')
-            ->join('karyawan k', 'k.id = p.karyawan_id', 'left')
-            ->orderBy('p.periode', 'DESC')
+        return $this->db->table('hrga_penilaian p')
+            ->select('p.*, k.nama_lengkap, k.nip')
+            ->join('hrga_karyawan k', 'k.id = p.karyawan_id')
             ->orderBy('p.created_at', 'DESC')
             ->get()
             ->getResultArray();

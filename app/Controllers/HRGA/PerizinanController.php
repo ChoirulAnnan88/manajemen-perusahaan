@@ -24,6 +24,7 @@ class PerizinanController extends BaseController
             'perizinan' => $this->perizinanModel->getAllWithKaryawan(),
             'karyawan' => $this->karyawanModel->getAllKaryawan()
         ];
+        // PERBAIKAN: ganti perizinan_index menjadi perizinan
         return view('hrga/perizinan', $data);
     }
 

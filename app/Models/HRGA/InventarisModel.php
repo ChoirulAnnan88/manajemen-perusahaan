@@ -6,13 +6,20 @@ use CodeIgniter\Model;
 
 class InventarisModel extends Model
 {
-    protected $table = 'inventaris';
+    protected $table = 'hrga_inventaris';
     protected $primaryKey = 'id';
-    protected $allowedFields = ['kode_barang', 'nama_barang', 'kategori', 'jumlah', 'kondisi', 'lokasi', 'created_at'];
-    protected $useTimestamps = false;
+    protected $allowedFields = [
+        'kode_inventaris', 'nama_barang', 'kategori', 'jumlah',
+        'kondisi', 'lokasi'
+    ];
+    protected $useTimestamps = true;
+    protected $createdField = 'created_at';
 
     public function getAllInventaris()
     {
-        return $this->orderBy('created_at', 'DESC')->findAll();
+        return $this->db->table('hrga_inventaris')
+            ->orderBy('created_at', 'DESC')
+            ->get()
+            ->getResultArray();
     }
 }

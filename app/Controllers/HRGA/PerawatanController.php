@@ -20,6 +20,7 @@ class PerawatanController extends BaseController
             'title' => 'Perawatan Gedung',
             'perawatan' => $this->perawatanModel->getAllPerawatan()
         ];
+        // PERBAIKAN: ganti perawatan_index menjadi perawatan
         return view('hrga/perawatan', $data);
     }
 

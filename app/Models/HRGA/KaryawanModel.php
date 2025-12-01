@@ -6,7 +6,7 @@ use CodeIgniter\Model;
 
 class KaryawanModel extends Model
 {
-    protected $table = 'karyawan';
+    protected $table = 'hrga_karyawan';
     protected $primaryKey = 'id';
     protected $allowedFields = ['nip', 'nama', 'divisi', 'jabatan', 'tanggal_masuk', 'status', 'gaji_pokok', 'created_at', 'updated_at'];
     protected $useTimestamps = false;

@@ -13,24 +13,37 @@ class HrgaController extends BaseController
 
     public function dashboard()
     {
-        // Inisialisasi models
-        $karyawanModel = new \App\Models\HRGA\KaryawanModel();
-        $absensiModel = new \App\Models\HRGA\AbsensiModel();
-        $penggajianModel = new \App\Models\HRGA\PenggajianModel();
-        $perizinanModel = new \App\Models\HRGA\PerizinanModel();
+        $db = \Config\Database::connect();
+        
+        // Hitung statistik dengan QUERY LANGSUNG ke tabel yang benar
+        $totalKaryawan = $db->table('hrga_karyawan')->countAllResults();
+        
+        $absensiHariIni = $db->table('hrga_absensi')
+            ->where('tanggal', date('Y-m-d'))
+            ->countAllResults();
         
         $bulan = date('m');
         $tahun = date('Y');
         
+        // Perbaiki query penggajian - kolom 'bulan_tahun' perlu diekstrak
+        $penggajianBulanIni = $db->table('hrga_penggajian')
+            ->where("DATE_FORMAT(bulan_tahun, '%Y-%m')", $tahun . '-' . $bulan)
+            ->countAllResults();
+        
+        $perizinanPending = $db->table('hrga_perizinan')
+            ->where('status', 'pending')
+            ->countAllResults();
+        
         $data = [
             'title' => 'HRGA Dashboard',
             'stats' => [
-                'total_karyawan' => $karyawanModel->countAll(),
-                'absensi_hari_ini' => $absensiModel->getAbsensiHariIniCount(),
-                'penggajian_bulan_ini' => $penggajianModel->getPenggajianBulanIniCount($bulan, $tahun),
-                'perizinan_pending' => $perizinanModel->getPerizinanPendingCount()
+                'total_karyawan' => $totalKaryawan,
+                'absensi_hari_ini' => $absensiHariIni,
+                'penggajian_bulan_ini' => $penggajianBulanIni,
+                'perizinan_pending' => $perizinanPending
             ]
         ];
+        
         return view('hrga/dashboard', $data);
     }
 }
