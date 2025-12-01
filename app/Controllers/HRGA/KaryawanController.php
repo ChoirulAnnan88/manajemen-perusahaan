@@ -20,7 +20,7 @@ class KaryawanController extends BaseController
             'title' => 'Data Karyawan',
             'karyawan' => $this->karyawanModel->getAllKaryawan()
         ];
-        return view('hrga/karyawan', $data);
+        return view('hrga/karyawan_index', $data);
     }
 
     public function tambah()

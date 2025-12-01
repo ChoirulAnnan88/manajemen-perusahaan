@@ -1,25 +1,16 @@
 <?php
 
-namespace Config;
-
 use CodeIgniter\Router\RouteCollection;
 
 /**
  * @var RouteCollection $routes
  */
 
-$routes->setDefaultNamespace('App\Controllers');
-$routes->setDefaultController('Home');
-$routes->setDefaultMethod('index');
-$routes->setTranslateURIDashes(false);
-$routes->set404Override();
-$routes->setAutoRoute(false); // Matikan auto route untuk keamanan
-
-// ========== PUBLIC ROUTES ==========
+// Public Routes
 $routes->get('/', 'Home::index');
-$routes->get('division/(:any)', 'Home::division/$1');
+$routes->get('division/(:segment)', 'Home::division/$1');
 
-// ========== AUTH ROUTES ==========
+// Auth Routes
 $routes->get('auth/login', 'Auth::login');
 $routes->post('auth/attemptLogin', 'Auth::attemptLogin');
 $routes->get('auth/buat-akun', 'Auth::buatAkun');
@@ -27,53 +18,58 @@ $routes->post('auth/proses-buat-akun', 'Auth::prosesBuatAkun');
 $routes->get('auth/logout', 'Auth::logout');
 $routes->get('auth/profile', 'Auth::profile');
 
-// ========== DASHBOARD ==========
+// Dashboard Route
 $routes->get('dashboard', 'Dashboard::index');
 
-// ========== HRGA ROUTES ==========
-$routes->group('hrga', ['namespace' => 'App\Controllers'], function($routes) {
+// ========== HRGA ROUTES (MULTIPLE CONTROLLERS) ==========
+$routes->group('hrga', ['namespace' => 'App\Controllers\HRGA'], function($routes) {
+    
+    // Dashboard HRGA - HrgaController
     $routes->get('/', 'HrgaController::index');
+    $routes->get('dashboard', 'HrgaController::dashboard');
     
-    // Karyawan
-    $routes->get('karyawan', 'HrgaController::karyawan');
-    $routes->get('karyawan/tambah', 'HrgaController::tambahKaryawan');
-    $routes->post('karyawan/simpan', 'HrgaController::simpanKaryawan');
-    $routes->get('karyawan/edit/(:num)', 'HrgaController::editKaryawan/$1');
-    $routes->post('karyawan/update/(:num)', 'HrgaController::updateKaryawan/$1');
-    $routes->get('karyawan/detail/(:num)', 'HrgaController::detailKaryawan/$1');
-    $routes->get('karyawan/hapus/(:num)', 'HrgaController::hapusKaryawan/$1');
+    // Karyawan Routes - KaryawanController
+    $routes->get('karyawan', 'KaryawanController::index');
+    $routes->get('karyawan/tambah', 'KaryawanController::tambah');
+    $routes->post('karyawan/simpan', 'KaryawanController::store');
+    $routes->get('karyawan/edit/(:num)', 'KaryawanController::edit/$1');
+    $routes->post('karyawan/update/(:num)', 'KaryawanController::update/$1');
+    $routes->get('karyawan/detail/(:num)', 'KaryawanController::detail/$1');
+    $routes->get('karyawan/hapus/(:num)', 'KaryawanController::hapus/$1');
     
-    // Absensi
-    $routes->get('absensi', 'HrgaController::absensi');
-    $routes->post('absensi/simpan', 'HrgaController::simpanAbsensi');
-    $routes->get('absensi/riwayat', 'HrgaController::riwayatAbsensi');
+    // Absensi Routes - AbsensiController
+    $routes->get('absensi', 'AbsensiController::index');
+    $routes->post('absensi/simpan', 'AbsensiController::simpan');
+    $routes->get('absensi/riwayat', 'AbsensiController::riwayat');
     
-    // Penggajian
-    $routes->get('penggajian', 'HrgaController::penggajian');
-    $routes->get('penggajian/generate', 'HrgaController::generatePenggajian');
-    $routes->post('penggajian/proses', 'HrgaController::prosesPenggajian');
-    $routes->get('penggajian/slip/(:num)', 'HrgaController::slipGaji/$1');
+    // Penggajian Routes - PenggajianController
+    $routes->get('penggajian', 'PenggajianController::index');
+    $routes->get('penggajian/generate', 'PenggajianController::generate');
+    $routes->post('penggajian/proses', 'PenggajianController::proses');
+    $routes->post('penggajian/bayar/(:num)', 'PenggajianController::bayar/$1');
+    $routes->get('penggajian/slip/(:num)', 'PenggajianController::slip/$1');
     
-    // Penilaian
-    $routes->get('penilaian', 'HrgaController::penilaian');
-    $routes->post('penilaian/simpan', 'HrgaController::simpanPenilaian');
+    // Penilaian Routes - PenilaianController
+    $routes->get('penilaian', 'PenilaianController::index');
+    $routes->post('penilaian/simpan', 'PenilaianController::simpan');
     
-    // Inventaris
-    $routes->get('inventaris', 'HrgaController::inventaris');
-    $routes->post('inventaris/simpan', 'HrgaController::simpanInventaris');
+    // Inventaris Routes - InventarisController
+    $routes->get('inventaris', 'InventarisController::index');
+    $routes->post('inventaris/simpan', 'InventarisController::simpan');
     
-    // Perawatan
-    $routes->get('perawatan', 'HrgaController::perawatan');
-    $routes->post('perawatan/simpan', 'HrgaController::simpanPerawatan');
+    // Perawatan Routes - PerawatanController
+    $routes->get('perawatan', 'PerawatanController::index');
+    $routes->post('perawatan/simpan', 'PerawatanController::simpan');
     
-    // Perizinan
-    $routes->get('perizinan', 'HrgaController::perizinan');
-    $routes->post('perizinan/ajukan', 'HrgaController::ajukanPerizinan');
-    $routes->get('perizinan/approve/(:num)', 'HrgaController::approvePerizinan/$1');
-    $routes->get('perizinan/reject/(:num)', 'HrgaController::rejectPerizinan/$1');
+    // Perizinan Routes - PerizinanController
+    $routes->get('perizinan', 'PerizinanController::index');
+    $routes->post('perizinan/ajukan', 'PerizinanController::ajukan');
+    $routes->get('perizinan/approve/(:num)', 'PerizinanController::approve/$1');
+    $routes->get('perizinan/reject/(:num)', 'PerizinanController::reject/$1');
 });
 
-// ========== HSE ROUTES ==========
+// ========== DIVISI LAIN (TETAP SAMA) ==========
+// HSE Routes - controller ada di app\Controllers\ (root)
 $routes->group('hse', ['namespace' => 'App\Controllers'], function($routes) {
     $routes->get('/', 'HseController::index');
     $routes->get('insiden', 'HseController::insiden');
@@ -82,7 +78,7 @@ $routes->group('hse', ['namespace' => 'App\Controllers'], function($routes) {
     $routes->get('lingkungan', 'HseController::lingkungan');
 });
 
-// ========== FINANCE ROUTES ==========
+// Finance Routes - controller ada di app\Controllers\ (root)
 $routes->group('finance', ['namespace' => 'App\Controllers'], function($routes) {
     $routes->get('/', 'FinanceController::index');
     $routes->get('transaksi', 'FinanceController::transaksi');
@@ -91,7 +87,7 @@ $routes->group('finance', ['namespace' => 'App\Controllers'], function($routes) 
     $routes->get('aset', 'FinanceController::aset');
 });
 
-// ========== PPIC ROUTES ==========
+// PPIC Routes - controller ada di app\Controllers\ (root)
 $routes->group('ppic', ['namespace' => 'App\Controllers'], function($routes) {
     $routes->get('/', 'PpicController::index');
     $routes->get('inventori', 'PpicController::inventori');
@@ -101,7 +97,7 @@ $routes->group('ppic', ['namespace' => 'App\Controllers'], function($routes) {
     $routes->get('pembeli', 'PpicController::pembeli');
 });
 
-// ========== PRODUKSI ROUTES ==========
+// Produksi Routes - controller ada di app\Controllers\ (root)
 $routes->group('produksi', ['namespace' => 'App\Controllers'], function($routes) {
     $routes->get('/', 'ProduksiController::index');
     $routes->get('hasil', 'ProduksiController::hasil');
@@ -109,7 +105,7 @@ $routes->group('produksi', ['namespace' => 'App\Controllers'], function($routes)
     $routes->get('operator', 'ProduksiController::operator');
 });
 
-// ========== MARKETING ROUTES ==========
+// Marketing Routes - controller ada di app\Controllers\ (root)
 $routes->group('marketing', ['namespace' => 'App\Controllers'], function($routes) {
     $routes->get('/', 'MarketingController::index');
     $routes->get('pelanggan', 'MarketingController::pelanggan');
@@ -118,29 +114,90 @@ $routes->group('marketing', ['namespace' => 'App\Controllers'], function($routes
     $routes->get('riset', 'MarketingController::riset');
 });
 
-// ========== 404 ERROR PAGE ==========
-$routes->set404Override(function() {
-    $data = [
-        'title' => '404 - Page Not Found',
-        'config' => config('App')
+// ========== DEBUG ROUTE UNTUK HRGA ==========
+$routes->get('debug-hrga-structure', function() {
+    echo "<h1>Debug HRGA Structure</h1>";
+    echo "Base URL: " . base_url() . "<br>";
+    echo "Current URL: " . current_url() . "<br><br>";
+    
+    // List semua controller HRGA
+    $hrgaDir = APPPATH . 'Controllers/HRGA/';
+    if (is_dir($hrgaDir)) {
+        echo "<h3>Controller HRGA yang ditemukan:</h3>";
+        echo "<table border='1' cellpadding='5'>";
+        echo "<tr><th>File</th><th>Class</th><th>Status</th></tr>";
+        
+        $files = scandir($hrgaDir);
+        foreach ($files as $file) {
+            if ($file != '.' && $file != '..' && pathinfo($file, PATHINFO_EXTENSION) === 'php') {
+                $filePath = $hrgaDir . $file;
+                echo "<tr>";
+                echo "<td>$file</td>";
+                
+                // Baca isi file
+                $content = file_get_contents($filePath);
+                
+                // Ekstrak nama class
+                preg_match('/class\s+(\w+)/', $content, $matches);
+                $className = $matches[1] ?? 'Unknown';
+                echo "<td>$className</td>";
+                
+                // Test class existence
+                $fullClassName = 'App\Controllers\HRGA\\' . $className;
+                if (class_exists($fullClassName)) {
+                    echo "<td style='color: green;'>✓ Dapat di-load</td>";
+                } else {
+                    echo "<td style='color: red;'>✗ Tidak dapat di-load</td>";
+                }
+                
+                echo "</tr>";
+            }
+        }
+        echo "</table>";
+    } else {
+        echo "Folder HRGA tidak ditemukan: $hrgaDir";
+    }
+    
+    // Test beberapa route
+    echo "<h3>Test Routes:</h3>";
+    echo "<ul>";
+    $testRoutes = [
+        '/hrga' => 'HrgaController::index',
+        '/hrga/karyawan' => 'KaryawanController::index',
+        '/hrga/absensi' => 'AbsensiController::index'
     ];
-    return view('errors/html/error_404', $data);
+    
+    foreach ($testRoutes as $route => $handler) {
+        echo "<li><a href='" . base_url($route) . "'>$route</a> → $handler</li>";
+    }
+    echo "</ul>";
+    
+    die();
 });
 
-// ========== CATCH-ALL FOR DEBUG ==========
-if (ENVIRONMENT === 'development') {
-    $routes->get('debug/routes', function() {
-        $collection = \Config\Services::routes();
-        echo "<h1>Debug Routes</h1>";
-        echo "<pre>";
-        print_r($collection->getRoutes());
-        echo "</pre>";
-    });
+// Catch all - 404
+$routes->set404Override(function() {
+    $html = '<!DOCTYPE html>
+    <html>
+    <head>
+        <title>404 - Halaman Tidak Ditemukan</title>
+        <style>
+            body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+            h1 { color: #d9534f; }
+            a { color: #007bff; text-decoration: none; }
+            a:hover { text-decoration: underline; }
+        </style>
+    </head>
+    <body>
+        <h1>404 - Halaman Tidak Ditemukan</h1>
+        <p>Halaman yang Anda cari tidak ditemukan.</p>
+        <p>URL: ' . current_url() . '</p>
+        <a href="' . base_url() . '">Kembali ke Home</a> | 
+        <a href="' . base_url('auth/login') . '">Login</a> | 
+        <a href="' . base_url('dashboard') . '">Dashboard</a> | 
+        <a href="' . base_url('debug-hrga-structure') . '">Debug HRGA Structure</a>
+    </body>
+    </html>';
     
-    $routes->get('debug/session', function() {
-        echo "<h1>Debug Session</h1>";
-        echo "<pre>";
-        print_r(session()->get());
-        echo "</pre>";
-    });
-}
+    return $html;
+});
