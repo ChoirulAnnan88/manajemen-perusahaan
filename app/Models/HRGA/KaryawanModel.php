@@ -8,42 +8,34 @@ class KaryawanModel extends Model
 {
     protected $table = 'hrga_karyawan';
     protected $primaryKey = 'id';
-    protected $allowedFields = ['nip', 'nama', 'divisi', 'jabatan', 'tanggal_masuk', 'status', 'gaji_pokok', 'created_at', 'updated_at'];
-    protected $useTimestamps = false;
-    protected $returnType = 'array';
+    protected $allowedFields = [
+        'nip', 
+        'nama_lengkap', 
+        'divisi_id', 
+        'jabatan', 
+        'tanggal_masuk', 
+        'status_karyawan', 
+        'gaji_pokok'
+    ];
+    protected $useTimestamps = true;
+    protected $createdField = 'created_at';
+    protected $updatedField = 'updated_at';
 
     public function getAllKaryawan()
     {
-        return $this->orderBy('created_at', 'DESC')->findAll();
+        return $this->db->table('hrga_karyawan k')
+            ->select('k.*, d.nama_divisi, d.kode_divisi')
+            ->join('divisi d', 'd.id = k.divisi_id', 'left')
+            ->orderBy('k.created_at', 'DESC')
+            ->get()
+            ->getResultArray();
     }
 
     public function getDivisi()
     {
-        // Jika tabel divisi ada di database Anda
-        if ($this->db->tableExists('divisi')) {
-            return $this->db->table('divisi')
-                ->orderBy('nama_divisi', 'ASC')
-                ->get()
-                ->getResultArray();
-        }
-        
-        // Fallback jika tidak ada tabel divisi
-        return [
-            ['id' => 1, 'nama_divisi' => 'HRGA'],
-            ['id' => 2, 'nama_divisi' => 'IT'],
-            ['id' => 3, 'nama_divisi' => 'Finance'],
-            ['id' => 4, 'nama_divisi' => 'Marketing'],
-            ['id' => 5, 'nama_divisi' => 'Operations']
-        ];
-    }
-
-    public function getWithDivisi($id)
-    {
-        return $this->find($id);
-    }
-
-    public function countAllKaryawan()
-    {
-        return $this->countAll();
+        return $this->db->table('divisi')
+            ->orderBy('nama_divisi', 'ASC')
+            ->get()
+            ->getResultArray();
     }
 }
