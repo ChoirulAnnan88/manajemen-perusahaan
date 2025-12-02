@@ -48,8 +48,6 @@ $routes->group('hrga', ['namespace' => 'App\Controllers\HRGA'], function($routes
     $routes->post('penggajian/proses', 'PenggajianController::proses');
     $routes->post('penggajian/bayar/(:num)', 'PenggajianController::bayar/$1');
     $routes->get('penggajian/slip/(:num)', 'PenggajianController::slip/$1');
-    $routes->get('penggajian/tambah', 'PenggajianController::tambah');
-    $routes->post('penggajian/simpan', 'PenggajianController::simpan');
     $routes->get('penggajian/edit/(:num)', 'PenggajianController::edit/$1');
     $routes->post('penggajian/update/(:num)', 'PenggajianController::update/$1');
     $routes->get('penggajian/hapus/(:num)', 'PenggajianController::hapus/$1');

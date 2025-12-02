@@ -5,16 +5,19 @@ namespace App\Controllers\HRGA;
 use App\Controllers\BaseController;
 use App\Models\HRGA\PenggajianModel;
 use App\Models\HRGA\KaryawanModel;
+use App\Models\DivisiModel;
 
 class PenggajianController extends BaseController
 {
     protected $penggajianModel;
     protected $karyawanModel;
+    protected $divisiModel;
 
     public function __construct()
     {
         $this->penggajianModel = new PenggajianModel();
         $this->karyawanModel = new KaryawanModel();
+        $this->divisiModel = new DivisiModel();
         helper('form');
     }
 
@@ -40,86 +43,11 @@ class PenggajianController extends BaseController
         $data = [
             'title' => 'Generate Penggajian',
             'karyawan' => $this->karyawanModel->findAllWithDivisi(),
+            'allDivisi' => $this->divisiModel->findAll(), // Tambahkan data semua divisi untuk filter
             'bulan' => $bulan,
             'tahun' => $tahun
         ];
         return view('hrga/penggajian_generate', $data);
-    }
-
-    public function tambah()
-    {
-        $data = [
-            'title' => 'Tambah Data Penggajian',
-            'karyawan' => $this->karyawanModel->findAllWithDivisi(),
-            'validation' => \Config\Services::validation()
-        ];
-        return view('hrga/penggajian_tambah', $data);
-    }
-
-    public function simpan()
-    {
-        // VALIDASI MANUAL tanpa "min/max" rules
-        $karyawan_id = $this->request->getPost('karyawan_id');
-        $bulan = $this->request->getPost('bulan');
-        $tahun = $this->request->getPost('tahun');
-        $gaji_pokok_input = $this->request->getPost('gaji_pokok');
-        $tunjangan_input = $this->request->getPost('tunjangan') ?? '0';
-        $potongan_input = $this->request->getPost('potongan') ?? '0';
-        
-        // VALIDASI
-        $errors = [];
-        
-        if (empty($karyawan_id) || $karyawan_id == '') {
-            $errors[] = 'Pilih karyawan terlebih dahulu';
-        }
-        
-        if (empty($bulan) || !is_numeric($bulan)) {
-            $errors[] = 'Bulan tidak valid';
-        }
-        
-        if (empty($tahun) || !is_numeric($tahun)) {
-            $errors[] = 'Tahun tidak valid';
-        }
-        
-        if (empty($gaji_pokok_input)) {
-            $errors[] = 'Gaji pokok tidak boleh kosong';
-        }
-        
-        if (!empty($errors)) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', implode('<br>', $errors));
-        }
-        
-        // CEK APAKAH SUDAH ADA DATA
-        if ($this->penggajianModel->sudahAdaPenggajian($karyawan_id, $bulan, $tahun)) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Data penggajian untuk karyawan ini pada periode tersebut sudah ada');
-        }
-        
-        // **BERSIHKAN ANGKA DARI FORMAT**
-        $gaji_pokok = $this->cleanNumber($gaji_pokok_input);
-        $tunjangan = $this->cleanNumber($tunjangan_input);
-        $potongan = $this->cleanNumber($potongan_input);
-        
-        // Hitung total
-        $total_gaji = $gaji_pokok + $tunjangan - $potongan;
-        
-        $data = [
-            'karyawan_id' => $karyawan_id,
-            'bulan_tahun' => $tahun . '-' . str_pad($bulan, 2, '0', STR_PAD_LEFT) . '-01',
-            'gaji_pokok' => $gaji_pokok,
-            'tunjangan' => $tunjangan,
-            'potongan' => $potongan,
-            'total_gaji' => $total_gaji,
-            'status' => 'draft'
-        ];
-        
-        $this->penggajianModel->save($data);
-        
-        return redirect()->to('/hrga/penggajian?bulan=' . $bulan . '&tahun=' . $tahun)
-            ->with('success', 'Data penggajian berhasil ditambahkan');
     }
 
     // Helper function untuk membersihkan angka
