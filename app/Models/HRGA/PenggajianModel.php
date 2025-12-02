@@ -19,10 +19,12 @@ class PenggajianModel extends Model
     public function getPenggajianPeriode($bulan, $tahun)
     {
         return $this->db->table('hrga_penggajian p')
-            ->select('p.*, k.nama_lengkap, k.nip')
+            ->select('p.*, k.nama_lengkap, k.nip, d.nama_divisi')
             ->join('hrga_karyawan k', 'k.id = p.karyawan_id')
+            ->join('divisi d', 'd.id = k.divisi_id', 'left')
             ->where('MONTH(p.bulan_tahun)', $bulan)
             ->where('YEAR(p.bulan_tahun)', $tahun)
+            ->orderBy('k.nama_lengkap', 'ASC')
             ->get()
             ->getResultArray();
     }
@@ -38,10 +40,19 @@ class PenggajianModel extends Model
     public function getSlipGaji($id)
     {
         return $this->db->table('hrga_penggajian p')
-            ->select('p.*, k.nama_lengkap, k.nip, k.jabatan')
+            ->select('p.*, k.nama_lengkap, k.nip, k.jabatan, d.nama_divisi')
             ->join('hrga_karyawan k', 'k.id = p.karyawan_id')
+            ->join('divisi d', 'd.id = k.divisi_id', 'left')
             ->where('p.id', $id)
             ->get()
             ->getRowArray();
+    }
+
+    public function sudahAdaPenggajian($karyawan_id, $bulan, $tahun)
+    {
+        return $this->where('karyawan_id', $karyawan_id)
+            ->where('MONTH(bulan_tahun)', $bulan)
+            ->where('YEAR(bulan_tahun)', $tahun)
+            ->countAllResults() > 0;
     }
 }
