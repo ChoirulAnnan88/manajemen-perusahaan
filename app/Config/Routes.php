@@ -21,7 +21,7 @@ $routes->get('auth/profile', 'Auth::profile');
 // Dashboard Route
 $routes->get('dashboard', 'Dashboard::index');
 
-// ========== HRGA ROUTES (MULTIPLE CONTROLLERS) ==========
+// ========== HRGA ROUTES (TIDAK DIUBAH) ==========
 $routes->group('hrga', ['namespace' => 'App\Controllers\HRGA'], function($routes) {
     
     // Dashboard HRGA - HrgaController
@@ -77,28 +77,51 @@ $routes->group('hrga', ['namespace' => 'App\Controllers\HRGA'], function($routes
     $routes->get('perizinan/detail/(:num)', 'PerizinanController::detail/$1');
 });
 
-// ========== DIVISI LAIN (TETAP SAMA) ==========
-// HSE Routes - controller ada di app\Controllers\ (root)
-$routes->group('hse', ['namespace' => 'App\Controllers'], function($routes) {
+// ========== HSE ROUTES (DENGAN NAMESPACE BARU) ==========
+$routes->group('hse', ['namespace' => 'App\Controllers\HSE'], function($routes) {
+    // Dashboard
     $routes->get('/', 'HseController::index');
+    $routes->get('dashboard', 'HseController::index');
+    
+    // Insiden Routes
     $routes->get('insiden', 'HseController::insiden');
+    $routes->get('insiden/tambah', 'HseController::tambahInsiden');
+    $routes->post('insiden/simpan', 'HseController::simpanInsiden');
+    $routes->get('insiden/detail/(:num)', 'HseController::detailInsiden/$1');
+    $routes->post('insiden/update-status/(:num)/(:segment)', 'HseController::updateStatusInsiden/$1/$2');
+    
+    // Risiko Routes
     $routes->get('risiko', 'HseController::risiko');
+    $routes->get('risiko/tambah', 'HseController::tambahRisiko');
+    $routes->post('risiko/simpan', 'HseController::simpanRisiko');
+    $routes->post('risiko/update-status/(:num)/(:segment)', 'HseController::updateStatusRisiko/$1/$2');
+    
+    // Pelatihan Routes
     $routes->get('pelatihan', 'HseController::pelatihan');
+    $routes->get('pelatihan/tambah', 'HseController::tambahPelatihan');
+    $routes->post('pelatihan/simpan', 'HseController::simpanPelatihan');
+    
+    // Lingkungan Routes
     $routes->get('lingkungan', 'HseController::lingkungan');
+    $routes->get('lingkungan/tambah', 'HseController::tambahLingkungan');
+    $routes->post('lingkungan/simpan', 'HseController::simpanLingkungan');
+    $routes->get('lingkungan/grafik', 'HseController::grafikLingkungan');
 });
 
-// Finance Routes - controller ada di app\Controllers\ (root)
-$routes->group('finance', ['namespace' => 'App\Controllers'], function($routes) {
+// ========== FINANCE ROUTES (DENGAN NAMESPACE BARU) ==========
+$routes->group('finance', ['namespace' => 'App\Controllers\FINANCE'], function($routes) {
     $routes->get('/', 'FinanceController::index');
+    $routes->get('dashboard', 'FinanceController::index');
     $routes->get('transaksi', 'FinanceController::transaksi');
     $routes->get('anggaran', 'FinanceController::anggaran');
     $routes->get('pajak', 'FinanceController::pajak');
     $routes->get('aset', 'FinanceController::aset');
 });
 
-// PPIC Routes - controller ada di app\Controllers\ (root)
-$routes->group('ppic', ['namespace' => 'App\Controllers'], function($routes) {
+// ========== PPIC ROUTES (DENGAN NAMESPACE BARU) ==========
+$routes->group('ppic', ['namespace' => 'App\Controllers\PPIC'], function($routes) {
     $routes->get('/', 'PpicController::index');
+    $routes->get('dashboard', 'PpicController::index');
     $routes->get('inventori', 'PpicController::inventori');
     $routes->get('produksi', 'PpicController::produksi');
     $routes->get('material', 'PpicController::material');
@@ -106,24 +129,26 @@ $routes->group('ppic', ['namespace' => 'App\Controllers'], function($routes) {
     $routes->get('pembeli', 'PpicController::pembeli');
 });
 
-// Produksi Routes - controller ada di app\Controllers\ (root)
-$routes->group('produksi', ['namespace' => 'App\Controllers'], function($routes) {
+// ========== PRODUKSI ROUTES (DENGAN NAMESPACE BARU) ==========
+$routes->group('produksi', ['namespace' => 'App\Controllers\PRODUKSI'], function($routes) {
     $routes->get('/', 'ProduksiController::index');
+    $routes->get('dashboard', 'ProduksiController::index');
     $routes->get('hasil', 'ProduksiController::hasil');
     $routes->get('alat', 'ProduksiController::alat');
     $routes->get('operator', 'ProduksiController::operator');
 });
 
-// Marketing Routes - controller ada di app\Controllers\ (root)
-$routes->group('marketing', ['namespace' => 'App\Controllers'], function($routes) {
+// ========== MARKETING ROUTES (DENGAN NAMESPACE BARU) ==========
+$routes->group('marketing', ['namespace' => 'App\Controllers\MARKETING'], function($routes) {
     $routes->get('/', 'MarketingController::index');
+    $routes->get('dashboard', 'MarketingController::index');
     $routes->get('pelanggan', 'MarketingController::pelanggan');
     $routes->get('penjualan', 'MarketingController::penjualan');
     $routes->get('kampanye', 'MarketingController::kampanye');
     $routes->get('riset', 'MarketingController::riset');
 });
 
-// ========== DEBUG ROUTE UNTUK HRGA ==========
+// ========== DEBUG ROUTE UNTUK HRGA (TIDAK DIUBAH) ==========
 $routes->get('debug-hrga-structure', function() {
     echo "<h1>Debug HRGA Structure</h1>";
     echo "Base URL: " . base_url() . "<br>";
@@ -184,6 +209,36 @@ $routes->get('debug-hrga-structure', function() {
     die();
 });
 
+// ========== DEBUG ROUTE UNTUK STRUKTUR BARU ==========
+$routes->get('debug-new-structure', function() {
+    echo "<h1>Debug New Structure - Controller per Divisi</h1>";
+    
+    $divisions = ['HSE', 'FINANCE', 'PPIC', 'PRODUKSI', 'MARKETING'];
+    
+    foreach ($divisions as $division) {
+        echo "<h2>Divisi: $division</h2>";
+        
+        // Cek pola HrgaController (huruf pertama kapital, sisanya kecil)
+        $controllerName = ucfirst(strtolower($division)) . 'Controller';
+        $controllerFile = APPPATH . "Controllers/$division/$controllerName.php";
+        $controllerClass = "App\Controllers\\$division\\$controllerName";
+        
+        echo "<ul>";
+        echo "<li>Controller Name: $controllerName</li>";
+        echo "<li>File: $controllerFile</li>";
+        echo "<li>Class: $controllerClass</li>";
+        echo "<li>File exists: " . (file_exists($controllerFile) ? '✓' : '✗') . "</li>";
+        echo "<li>Class exists: " . (class_exists($controllerClass) ? '✓' : '✗') . "</li>";
+        echo "</ul>";
+        
+        // Test route
+        $route = strtolower($division);
+        echo "<p>Test Route: <a href='" . base_url($route) . "' target='_blank'>/$route</a></p><hr>";
+    }
+    
+    die();
+});
+
 // Catch all - 404
 $routes->set404Override(function() {
     $html = '<!DOCTYPE html>
@@ -203,8 +258,9 @@ $routes->set404Override(function() {
         <p>URL: ' . current_url() . '</p>
         <a href="' . base_url() . '">Kembali ke Home</a> | 
         <a href="' . base_url('auth/login') . '">Login</a> | 
-        <a href="' . base_url('dashboard') . '">Dashboard</a> | 
-        <a href="' . base_url('debug-hrga-structure') . '">Debug HRGA Structure</a>
+        <a href="' . base_url('dashboard') . '">Dashboard</a> |
+        <a href="' . base_url('debug-hrga-structure') . '">Debug HRGA Structure</a> |
+        <a href="' . base_url('debug-new-structure') . '">Debug New Structure</a>
     </body>
     </html>';
     

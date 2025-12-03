@@ -21,7 +21,13 @@
     "autoload": {
         "psr-4": {
             "App\\": "app/",
-            "Config\\": "app/Config/"
+            "Config\\": "app/Config/",
+            "App\\Controllers\\HRGA\\": "app/Controllers/HRGA/",
+            "App\\Controllers\\HSE\\": "app/Controllers/HSE/",
+            "App\\Controllers\\FINANCE\\": "app/Controllers/FINANCE/",
+            "App\\Controllers\\PPIC\\": "app/Controllers/PPIC/",
+            "App\\Controllers\\PRODUKSI\\": "app/Controllers/PRODUKSI/",
+            "App\\Controllers\\MARKETING\\": "app/Controllers/MARKETING/"
         },
         "exclude-from-classmap": [
             "**/Database/Migrations/**"
