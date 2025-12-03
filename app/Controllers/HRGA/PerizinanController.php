@@ -15,6 +15,7 @@ class PerizinanController extends BaseController
     {
         $this->perizinanModel = new PerizinanModel();
         $this->karyawanModel = new KaryawanModel();
+        helper(['form', 'url']);
     }
 
     public function index()
@@ -24,7 +25,6 @@ class PerizinanController extends BaseController
             'perizinan' => $this->perizinanModel->getAllWithKaryawan(),
             'karyawan' => $this->karyawanModel->getAllKaryawan()
         ];
-        // PERBAIKAN: ganti perizinan_index menjadi perizinan
         return view('hrga/perizinan', $data);
     }
 
@@ -40,7 +40,7 @@ class PerizinanController extends BaseController
             return redirect()->to('/hrga/perizinan')->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        $this->perizinanModel->save([
+        $data = [
             'karyawan_id' => $this->request->getPost('karyawan_id'),
             'jenis_izin' => $this->request->getPost('jenis_izin'),
             'tanggal_mulai' => $this->request->getPost('tanggal_mulai'),
@@ -48,28 +48,54 @@ class PerizinanController extends BaseController
             'alasan' => $this->request->getPost('alasan'),
             'status' => 'pending',
             'created_at' => date('Y-m-d H:i:s')
-        ]);
+        ];
+
+        $this->perizinanModel->insert($data);
 
         return redirect()->to('/hrga/perizinan')->with('success', 'Perizinan berhasil diajukan');
     }
 
     public function approve($id)
     {
-        $this->perizinanModel->update($id, [
+        $data = [
             'status' => 'approved',
-            'approved_at' => date('Y-m-d H:i:s')
-        ]);
+            'approved_at' => date('Y-m-d H:i:s'),
+            'rejected_at' => null
+        ];
+
+        $this->perizinanModel->update($id, $data);
 
         return redirect()->to('/hrga/perizinan')->with('success', 'Perizinan berhasil disetujui');
     }
 
     public function reject($id)
     {
-        $this->perizinanModel->update($id, [
+        $data = [
             'status' => 'rejected',
-            'rejected_at' => date('Y-m-d H:i:s')
-        ]);
+            'rejected_at' => date('Y-m-d H:i:s'),
+            'approved_at' => null
+        ];
+
+        $this->perizinanModel->update($id, $data);
 
         return redirect()->to('/hrga/perizinan')->with('success', 'Perizinan berhasil ditolak');
+    }
+
+    // TAMBAHKAN FUNGSI DETAIL
+    public function detail($id)
+    {
+        $perizinan = $this->perizinanModel->getByIdWithKaryawan($id);
+        
+        if (!$perizinan) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Data perizinan tidak ditemukan'
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'data' => $perizinan
+        ]);
     }
 }

@@ -12,9 +12,9 @@ class InventarisModel extends Model
         'kode_inventaris', 'nama_barang', 'kategori', 'jumlah',
         'kondisi', 'lokasi'
     ];
-    protected $useTimestamps = true;
+    protected $useTimestamps = false;
     protected $createdField = 'created_at';
-    protected $updatedField = '';
+    protected $updatedField = 'updated_at';
 
     public function getAllInventaris()
     {

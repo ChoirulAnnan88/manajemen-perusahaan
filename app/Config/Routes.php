@@ -28,6 +28,7 @@ $routes->group('hrga', ['namespace' => 'App\Controllers\HRGA'], function($routes
     $routes->get('/', 'HrgaController::index');
     $routes->get('dashboard', 'HrgaController::dashboard');
     
+    
     // Karyawan Routes - KaryawanController
     $routes->get('karyawan', 'KaryawanController::index');
     $routes->get('karyawan/tambah', 'KaryawanController::tambah');
@@ -60,6 +61,9 @@ $routes->group('hrga', ['namespace' => 'App\Controllers\HRGA'], function($routes
     // Inventaris Routes - InventarisController
     $routes->get('inventaris', 'InventarisController::index');
     $routes->post('inventaris/simpan', 'InventarisController::simpan');
+    $routes->get('inventaris/detail/(:num)', 'InventarisController::detail/$1');
+    $routes->post('inventaris/update/(:num)', 'InventarisController::update/$1');
+    $routes->get('inventaris/hapus/(:num)', 'InventarisController::hapus/$1');
     
     // Perawatan Routes - PerawatanController
     $routes->get('perawatan', 'PerawatanController::index');
@@ -70,6 +74,7 @@ $routes->group('hrga', ['namespace' => 'App\Controllers\HRGA'], function($routes
     $routes->post('perizinan/ajukan', 'PerizinanController::ajukan');
     $routes->get('perizinan/approve/(:num)', 'PerizinanController::approve/$1');
     $routes->get('perizinan/reject/(:num)', 'PerizinanController::reject/$1');
+    $routes->get('perizinan/detail/(:num)', 'PerizinanController::detail/$1');
 });
 
 // ========== DIVISI LAIN (TETAP SAMA) ==========
