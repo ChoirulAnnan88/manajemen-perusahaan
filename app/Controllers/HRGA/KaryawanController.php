@@ -4,24 +4,40 @@ namespace App\Controllers\HRGA;
 
 use App\Controllers\BaseController;
 use App\Models\HRGA\KaryawanModel;
+use App\Models\UserModel;
 
 class KaryawanController extends BaseController
 {
     protected $karyawanModel;
+    protected $userModel;
 
     public function __construct()
     {
         $this->karyawanModel = new KaryawanModel();
+        $this->userModel = new UserModel();
         helper(['form', 'url']);
     }
 
     public function index()
     {
+        // Otomatis sync users yang belum memiliki data karyawan
+        $this->autoSyncUnlinkedUsers();
+        
         $data = [
             'title' => 'Data Karyawan',
             'karyawan' => $this->karyawanModel->getAllKaryawan()
         ];
         return view('hrga/karyawan', $data);
+    }
+    
+    // Method untuk auto-sync users yang belum terlink ke hrga_karyawan
+    private function autoSyncUnlinkedUsers()
+    {
+        $usersWithoutKaryawan = $this->karyawanModel->getUsersWithoutKaryawan();
+        
+        foreach ($usersWithoutKaryawan as $user) {
+            $this->karyawanModel->syncUserToKaryawan($user['id']);
+        }
     }
 
     public function tambah()
@@ -29,6 +45,7 @@ class KaryawanController extends BaseController
         $data = [
             'title' => 'Tambah Data Karyawan',
             'divisi' => $this->karyawanModel->getDivisi(),
+            'users' => $this->userModel->findAll(),
             'validation' => \Config\Services::validation()
         ];
         return view('hrga/karyawan_tambah', $data);
@@ -38,6 +55,14 @@ class KaryawanController extends BaseController
     {
         // Validasi input
         $rules = [
+            'user_id' => [
+                'rules' => 'required|numeric|is_unique[hrga_karyawan.user_id]',
+                'errors' => [
+                    'required' => 'User harus dipilih',
+                    'numeric' => 'User tidak valid',
+                    'is_unique' => 'User sudah memiliki data karyawan'
+                ]
+            ],
             'nip' => [
                 'rules' => 'required|is_unique[hrga_karyawan.nip]',
                 'errors' => [
@@ -81,10 +106,9 @@ class KaryawanController extends BaseController
                 ]
             ],
             'gaji_pokok' => [
-                'rules' => 'required|numeric',
+                'rules' => 'required',
                 'errors' => [
-                    'required' => 'Gaji pokok harus diisi',
-                    'numeric' => 'Gaji harus berupa angka'
+                    'required' => 'Gaji pokok harus diisi'
                 ]
             ]
         ];
@@ -95,13 +119,14 @@ class KaryawanController extends BaseController
                 ->with('validation', $this->validator);
         }
 
-        // Format gaji: hilangkan titik/koma jika ada
+        // Format gaji - Hapus titik separator
         $gaji_pokok = $this->request->getPost('gaji_pokok');
         $gaji_pokok = str_replace(['.', ','], '', $gaji_pokok);
         $gaji_pokok = (float) $gaji_pokok;
 
         // Siapkan data untuk disimpan
         $data = [
+            'user_id' => (int) $this->request->getPost('user_id'),
             'nip' => $this->request->getPost('nip'),
             'nama_lengkap' => $this->request->getPost('nama_lengkap'),
             'divisi_id' => (int) $this->request->getPost('divisi_id'),
@@ -112,13 +137,11 @@ class KaryawanController extends BaseController
         ];
 
         try {
-            // Simpan ke database
             $this->karyawanModel->save($data);
             return redirect()->to('/hrga/karyawan')
                 ->with('success', 'Data karyawan berhasil ditambahkan');
                 
         } catch (\Exception $e) {
-            // Tangani error database
             return redirect()->to('/hrga/karyawan/tambah')
                 ->withInput()
                 ->with('error', 'Gagal menyimpan data: ' . $e->getMessage());
@@ -198,10 +221,9 @@ class KaryawanController extends BaseController
                 ]
             ],
             'gaji_pokok' => [
-                'rules' => 'required|numeric',
+                'rules' => 'required',
                 'errors' => [
-                    'required' => 'Gaji pokok harus diisi',
-                    'numeric' => 'Gaji harus berupa angka'
+                    'required' => 'Gaji pokok harus diisi'
                 ]
             ]
         ];
@@ -212,7 +234,7 @@ class KaryawanController extends BaseController
                 ->with('validation', $this->validator);
         }
 
-        // Format gaji
+        // Format gaji - Hapus titik separator
         $gaji_pokok = $this->request->getPost('gaji_pokok');
         $gaji_pokok = str_replace(['.', ','], '', $gaji_pokok);
         $gaji_pokok = (float) $gaji_pokok;
@@ -249,9 +271,16 @@ class KaryawanController extends BaseController
                 ->with('error', 'Data karyawan tidak ditemukan');
         }
 
+        // Ambil data user terkait jika ada
+        $user = null;
+        if (!empty($karyawan['user_id'])) {
+            $user = $this->userModel->find($karyawan['user_id']);
+        }
+
         $data = [
             'title' => 'Detail Karyawan',
-            'karyawan' => $karyawan
+            'karyawan' => $karyawan,
+            'user' => $user
         ];
         
         return view('hrga/karyawan_detail', $data);
@@ -275,5 +304,26 @@ class KaryawanController extends BaseController
             return redirect()->to('/hrga/karyawan')
                 ->with('error', 'Gagal menghapus data: ' . $e->getMessage());
         }
+    }
+    
+    public function syncAllUsers()
+    {
+        $users = $this->userModel->findAll();
+        $synced = 0;
+        $alreadyExists = 0;
+        
+        foreach ($users as $user) {
+            $existingKaryawan = $this->karyawanModel->where('user_id', $user['id'])->first();
+            
+            if (!$existingKaryawan) {
+                $this->karyawanModel->syncUserToKaryawan($user['id']);
+                $synced++;
+            } else {
+                $alreadyExists++;
+            }
+        }
+        
+        return redirect()->to('/hrga/karyawan')
+            ->with('success', "Sync selesai: $synced user baru ditambahkan, $alreadyExists sudah ada.");
     }
 }

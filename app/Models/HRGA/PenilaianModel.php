@@ -14,6 +14,7 @@ class PenilaianModel extends Model
     ];
     protected $useTimestamps = true;
     protected $createdField = 'created_at';
+    protected $updatedField = '';
 
     public function getAllWithKaryawan()
     {

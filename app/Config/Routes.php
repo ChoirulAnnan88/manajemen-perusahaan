@@ -31,7 +31,7 @@ $routes->group('hrga', ['namespace' => 'App\Controllers\HRGA'], function($routes
     // Karyawan Routes - KaryawanController
     $routes->get('karyawan', 'KaryawanController::index');
     $routes->get('karyawan/tambah', 'KaryawanController::tambah');
-    $routes->post('karyawan/simpan', 'KaryawanController::store');
+    $routes->post('karyawan/store', 'KaryawanController::store');
     $routes->get('karyawan/edit/(:num)', 'KaryawanController::edit/$1');
     $routes->post('karyawan/update/(:num)', 'KaryawanController::update/$1');
     $routes->get('karyawan/detail/(:num)', 'KaryawanController::detail/$1');
