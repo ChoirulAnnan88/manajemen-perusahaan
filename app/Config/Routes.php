@@ -136,10 +136,51 @@ $routes->group('hse', ['namespace' => 'App\Controllers\HSE'], function($routes) 
 $routes->group('finance', ['namespace' => 'App\Controllers\FINANCE'], function($routes) {
     $routes->get('/', 'FinanceController::index');
     $routes->get('dashboard', 'FinanceController::index');
-    $routes->get('transaksi', 'FinanceController::transaksi');
-    $routes->get('anggaran', 'FinanceController::anggaran');
-    $routes->get('pajak', 'FinanceController::pajak');
-    $routes->get('aset', 'FinanceController::aset');
+    
+    // Transaksi Routes
+    $routes->group('transaksi', function($routes) {
+        $routes->get('/', 'TransaksiController::index');
+        $routes->get('create', 'TransaksiController::create');
+        $routes->post('store', 'TransaksiController::store');
+        $routes->get('view/(:num)', 'TransaksiController::view/$1');
+        $routes->get('edit/(:num)', 'TransaksiController::edit/$1');
+        $routes->post('update/(:num)', 'TransaksiController::update/$1');
+        $routes->get('delete/(:num)', 'TransaksiController::delete/$1');
+    });
+    
+    // Anggaran Routes
+    $routes->group('anggaran', function($routes) {
+        $routes->get('/', 'AnggaranController::index');
+        $routes->get('create', 'AnggaranController::create');
+        $routes->post('store', 'AnggaranController::store');
+        $routes->get('view/(:num)', 'AnggaranController::view/$1');
+        $routes->get('edit/(:num)', 'AnggaranController::edit/$1');
+        $routes->post('update/(:num)', 'AnggaranController::update/$1');
+        $routes->get('delete/(:num)', 'AnggaranController::delete/$1');
+    });
+    
+    // Pajak Routes
+    $routes->group('pajak', function($routes) {
+        $routes->get('/', 'PerpajakanController::index');
+        $routes->get('create', 'PerpajakanController::create');
+        $routes->post('store', 'PerpajakanController::store');
+        $routes->get('view/(:num)', 'PerpajakanController::view/$1');
+        $routes->get('edit/(:num)', 'PerpajakanController::edit/$1');
+        $routes->post('update/(:num)', 'PerpajakanController::update/$1');
+        $routes->get('delete/(:num)', 'PerpajakanController::delete/$1');
+        $routes->get('mark-paid/(:num)', 'PerpajakanController::markPaid/$1');
+    });
+    
+    // Aset Routes
+    $routes->group('aset', function($routes) {
+        $routes->get('/', 'AsetController::index');
+        $routes->get('create', 'AsetController::create');
+        $routes->post('store', 'AsetController::store');
+        $routes->get('view/(:num)', 'AsetController::view/$1');
+        $routes->get('edit/(:num)', 'AsetController::edit/$1');
+        $routes->post('update/(:num)', 'AsetController::update/$1');
+        $routes->get('delete/(:num)', 'AsetController::delete/$1');
+    });
 });
 
 // ========== PPIC ROUTES (DENGAN NAMESPACE BARU) ==========
