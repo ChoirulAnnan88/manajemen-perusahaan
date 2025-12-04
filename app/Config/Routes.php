@@ -84,28 +84,52 @@ $routes->group('hse', ['namespace' => 'App\Controllers\HSE'], function($routes) 
     $routes->get('dashboard', 'HseController::index');
     
     // Insiden Routes
-    $routes->get('insiden', 'HseController::insiden');
-    $routes->get('insiden/tambah', 'HseController::tambahInsiden');
-    $routes->post('insiden/simpan', 'HseController::simpanInsiden');
-    $routes->get('insiden/detail/(:num)', 'HseController::detailInsiden/$1');
-    $routes->post('insiden/update-status/(:num)/(:segment)', 'HseController::updateStatusInsiden/$1/$2');
+    $routes->group('insiden', function($routes) {
+        $routes->get('/', 'HseController::insiden');
+        $routes->get('tambah', 'HseController::tambahInsiden');
+        $routes->post('simpan', 'HseController::simpanInsiden');
+        $routes->get('detail/(:num)', 'HseController::detailInsiden/$1');
+        $routes->get('edit/(:num)', 'HseController::editInsiden/$1');
+        $routes->post('update/(:num)', 'HseController::updateInsiden/$1');
+        $routes->get('confirm-delete/(:num)', 'HseController::confirmDeleteInsiden/$1');
+        $routes->post('delete/(:num)', 'HseController::deleteInsiden/$1');
+        $routes->post('update-status/(:num)/(:segment)', 'HseController::updateStatusInsiden/$1/$2');
+    });
     
     // Risiko Routes
-    $routes->get('risiko', 'HseController::risiko');
-    $routes->get('risiko/tambah', 'HseController::tambahRisiko');
-    $routes->post('risiko/simpan', 'HseController::simpanRisiko');
-    $routes->post('risiko/update-status/(:num)/(:segment)', 'HseController::updateStatusRisiko/$1/$2');
+    $routes->group('risiko', function($routes) {
+        $routes->get('/', 'HseController::risiko');
+        $routes->get('tambah', 'HseController::tambahRisiko');
+        $routes->post('simpan', 'HseController::simpanRisiko');
+        $routes->post('update-status/(:num)/(:segment)', 'HseController::updateStatusRisiko/$1/$2');
+        $routes->get('hapus/(:num)', 'HseController::hapusRisiko/$1');
+    });
     
     // Pelatihan Routes
-    $routes->get('pelatihan', 'HseController::pelatihan');
-    $routes->get('pelatihan/tambah', 'HseController::tambahPelatihan');
-    $routes->post('pelatihan/simpan', 'HseController::simpanPelatihan');
+    $routes->group('pelatihan', function($routes) {
+        $routes->get('/', 'HseController::pelatihan');
+        $routes->get('tambah', 'HseController::tambahPelatihan');
+        $routes->post('simpan', 'HseController::simpanPelatihan');
+        $routes->get('edit/(:num)', 'HseController::editPelatihan/$1');
+        $routes->post('update/(:num)', 'HseController::updatePelatihan/$1');
+        $routes->get('konfirmasi-hapus/(:num)', 'HseController::konfirmasiHapusPelatihan/$1');
+        $routes->post('hapus/(:num)', 'HseController::hapusPelatihan/$1');
+    });
     
     // Lingkungan Routes
-    $routes->get('lingkungan', 'HseController::lingkungan');
-    $routes->get('lingkungan/tambah', 'HseController::tambahLingkungan');
-    $routes->post('lingkungan/simpan', 'HseController::simpanLingkungan');
-    $routes->get('lingkungan/grafik', 'HseController::grafikLingkungan');
+    $routes->group('lingkungan', function($routes) {
+        $routes->get('/', 'HseController::lingkungan');
+        $routes->get('tambah', 'HseController::tambahLingkungan');
+        $routes->post('simpan', 'HseController::simpanLingkungan');
+        $routes->get('grafik', 'HseController::grafikLingkungan');
+        $routes->get('detail/(:num)', 'HseController::detailLingkungan/$1');
+        $routes->get('edit/(:num)', 'HseController::editLingkungan/$1');
+        $routes->post('update/(:num)', 'HseController::updateLingkungan/$1');
+        $routes->get('confirm-hapus/(:num)', 'HseController::confirmHapusLingkungan/$1');
+        $routes->post('hapus/(:num)', 'HseController::hapusLingkungan/$1');
+        $routes->get('terhapus', 'HseController::dataTerhapus');
+        $routes->get('restore/(:num)', 'HseController::restoreLingkungan/$1');
+    });
 });
 
 // ========== FINANCE ROUTES (DENGAN NAMESPACE BARU) ==========

@@ -7,126 +7,161 @@ class InsidenModel extends Model
 {
     protected $table = 'hse_insiden';
     protected $primaryKey = 'id';
-    protected $allowedFields = ['nomor_laporan', 'tanggal_kejadian', 'lokasi', 'jenis_insiden', 
-                               'deskripsi', 'tindakan', 'status', 'karyawan_id', 'pelapor_id'];
+    protected $useAutoIncrement = true;
+    protected $returnType = 'array';
+    protected $useSoftDeletes = false;
+    protected $protectFields = true;
+    
+    protected $allowedFields = [
+        'nomor_laporan', 
+        'tanggal_kejadian', 
+        'lokasi', 
+        'jenis_insiden', 
+        'deskripsi', 
+        'tindakan', 
+        'status',
+        'pelapor_id', 
+        'karyawan_id'
+    ];
+    
     protected $useTimestamps = true;
+    protected $dateFormat = 'datetime';
     protected $createdField = 'created_at';
     protected $updatedField = 'updated_at';
-    protected $dateFormat = 'datetime';
     
-    // Relationships
-    protected function initialize()
+    // Validasi
+    protected $validationRules = [
+        'nomor_laporan' => 'required',
+        'tanggal_kejadian' => 'required',
+        'lokasi' => 'required',
+        'jenis_insiden' => 'required',
+        'deskripsi' => 'required',
+        'status' => 'required'
+    ];
+    
+    protected $validationMessages = [];
+    protected $skipValidation = false;
+    
+    // Generate nomor laporan
+    public function generateNomorLaporan()
     {
-        $this->db = \Config\Database::connect();
+        $year = date('Y');
+        $month = date('m');
+        
+        // Cari nomor terakhir untuk bulan ini
+        $last = $this->like('nomor_laporan', 'INS/' . $year . '/' . $month . '/')
+                    ->orderBy('id', 'DESC')
+                    ->first();
+        
+        if ($last) {
+            $lastNumber = (int) substr($last['nomor_laporan'], -4);
+            $nextNumber = $lastNumber + 1;
+        } else {
+            $nextNumber = 1;
+        }
+        
+        return 'INS/' . $year . '/' . $month . '/' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
     }
     
+    // Get data dengan relasi (DIPERBAIKI - hapus nip)
     public function getInsidenWithRelations($id = null)
     {
-        $builder = $this->db->table('hse_insiden i')
-            ->select('i.*, k.nama_lengkap as nama_karyawan, k.nip, d.nama_divisi, 
-                     u_pelapor.username as pelapor_username, u_pelapor.nama_lengkap as pelapor_nama')
-            ->join('hrga_karyawan k', 'k.id = i.karyawan_id', 'left')
-            ->join('divisi d', 'd.id = k.divisi_id', 'left')
-            ->join('users u_pelapor', 'u_pelapor.id = i.pelapor_id', 'left')
-            ->orderBy('i.tanggal_kejadian', 'DESC');
+        $builder = $this->db->table('hse_insiden i');
+        $builder->select('i.*, 
+                         u_pelapor.nama_lengkap as pelapor_nama, 
+                         u_pelapor.username as pelapor_username,
+                         u_karyawan.nama_lengkap as nama_karyawan,
+                         u_karyawan.username as username_karyawan,
+                         d.nama_divisi');
+        
+        $builder->join('users u_pelapor', 'u_pelapor.id = i.pelapor_id', 'left');
+        $builder->join('users u_karyawan', 'u_karyawan.id = i.karyawan_id', 'left');
+        $builder->join('divisi d', 'd.id = u_karyawan.divisi_id', 'left');
         
         if ($id) {
             $builder->where('i.id', $id);
             return $builder->get()->getRowArray();
         }
         
+        $builder->orderBy('i.tanggal_kejadian', 'DESC');
         return $builder->get()->getResultArray();
     }
     
+    // Get insiden by divisi (DIPERBAIKI - hapus nip)
     public function getInsidenByDivisi($divisiId)
     {
-        return $this->db->table('hse_insiden i')
-            ->select('i.*, k.nama_lengkap, k.nip, d.nama_divisi')
-            ->join('hrga_karyawan k', 'k.id = i.karyawan_id')
-            ->join('divisi d', 'd.id = k.divisi_id')
-            ->where('k.divisi_id', $divisiId)
-            ->orderBy('i.tanggal_kejadian', 'DESC')
-            ->get()
-            ->getResultArray();
-    }
-    
-    public function generateNomorLaporan()
-    {
-        $year = date('Y');
-        $month = date('m');
-        $prefix = 'INS-' . $year . $month . '-';
-        
-        $last = $this->select('nomor_laporan')
-                    ->like('nomor_laporan', $prefix)
-                    ->orderBy('id', 'DESC')
-                    ->first();
-        
-        if ($last) {
-            $lastNumber = (int) substr($last['nomor_laporan'], -4);
-            $newNumber = $lastNumber + 1;
-        } else {
-            $newNumber = 1;
-        }
-        
-        return $prefix . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
-    }
-    
-    public function getInsidenStats($userId = null, $divisiId = null)
-    {
         $builder = $this->db->table('hse_insiden i');
+        $builder->select('i.*, 
+                         u_pelapor.nama_lengkap as pelapor_nama, 
+                         u_pelapor.username as pelapor_username,
+                         u_karyawan.nama_lengkap as nama_karyawan,
+                         u_karyawan.username as username_karyawan,
+                         d.nama_divisi');
         
-        if ($userId) {
-            $builder->where('i.pelapor_id', $userId);
-        }
+        $builder->join('users u_pelapor', 'u_pelapor.id = i.pelapor_id', 'left');
+        $builder->join('users u_karyawan', 'u_karyawan.id = i.karyawan_id', 'left');
+        $builder->join('divisi d', 'd.id = u_karyawan.divisi_id', 'left');
+        $builder->groupStart()
+               ->where('u_karyawan.divisi_id', $divisiId)
+               ->orWhere('u_pelapor.divisi_id', $divisiId)
+               ->groupEnd();
         
-        if ($divisiId) {
-            $builder->join('hrga_karyawan k', 'k.id = i.karyawan_id')
-                    ->where('k.divisi_id', $divisiId);
+        $builder->orderBy('i.tanggal_kejadian', 'DESC');
+        return $builder->get()->getResultArray();
+    }
+    
+    // Get stats untuk dashboard
+    public function getInsidenStats($userId, $divisiId)
+    {
+        $session = session();
+        $userRole = $session->get('role');
+        
+        $builder = $this;
+        
+        if ($userRole === 'manager') {
+            // Manager lihat semua
+        } elseif ($userRole === 'staff') {
+            // Staff lihat berdasarkan divisi
+            $builder->join('users u', 'u.id = hse_insiden.karyawan_id', 'left')
+                   ->where('u.divisi_id', $divisiId);
+        } else {
+            // Operator hanya lihat laporannya sendiri
+            $builder->where('pelapor_id', $userId);
         }
         
         $total = $builder->countAllResults();
+        $selesai = $builder->where('status', 'selesai')->countAllResults();
+        $investigasi = $builder->where('status', 'investigasi')->countAllResults();
+        $dilaporkan = $builder->where('status', 'dilaporkan')->countAllResults();
         
         return [
             'total' => $total,
-            'dilaporkan' => $this->where('status', 'dilaporkan')->countAllResults(),
-            'investigasi' => $this->where('status', 'investigasi')->countAllResults(),
-            'selesai' => $this->where('status', 'selesai')->countAllResults(),
-            'by_jenis' => $this->select('jenis_insiden, COUNT(*) as jumlah')
-                              ->groupBy('jenis_insiden')
-                              ->get()
-                              ->getResultArray(),
-            'by_month' => $this->select("DATE_FORMAT(tanggal_kejadian, '%Y-%m') as bulan, COUNT(*) as jumlah")
-                              ->groupBy("DATE_FORMAT(tanggal_kejadian, '%Y-%m')")
-                              ->orderBy('bulan', 'DESC')
-                              ->limit(6)
-                              ->get()
-                              ->getResultArray(),
+            'selesai' => $selesai,
+            'investigasi' => $investigasi,
+            'dilaporkan' => $dilaporkan,
         ];
     }
     
+    // Get options untuk dropdown (DIPERBAIKI - hapus nip)
     public function getPelaporOptions()
     {
-        return $this->db->table('users u')
-            ->select('u.id, u.username, u.nama_lengkap, u.divisi_id, d.nama_divisi')
-            ->join('divisi d', 'd.id = u.divisi_id', 'left')
-            ->where('u.is_active', 1)
-            ->orderBy('u.nama_lengkap')
-            ->get()
-            ->getResultArray();
+        $builder = $this->db->table('users u');
+        $builder->select('u.id, u.nama_lengkap, u.username, d.nama_divisi');
+        $builder->join('divisi d', 'd.id = u.divisi_id', 'left');
+        $builder->where('u.is_active', 1);
+        $builder->orderBy('u.nama_lengkap', 'ASC');
+        
+        return $builder->get()->getResultArray();
     }
     
-    public function getKaryawanOptions($divisiId = null)
+    public function getKaryawanOptions()
     {
-        $builder = $this->db->table('hrga_karyawan k')
-            ->select('k.id, k.nip, k.nama_lengkap, k.divisi_id, d.nama_divisi, k.jabatan')
-            ->join('divisi d', 'd.id = k.divisi_id', 'left');
+        $builder = $this->db->table('users u');
+        $builder->select('u.id, u.nama_lengkap, u.username, d.nama_divisi');
+        $builder->join('divisi d', 'd.id = u.divisi_id', 'left');
+        $builder->where('u.is_active', 1);
+        $builder->orderBy('u.nama_lengkap', 'ASC');
         
-        if ($divisiId) {
-            $builder->where('k.divisi_id', $divisiId);
-        }
-        
-        return $builder->orderBy('k.nama_lengkap')
-                      ->get()
-                      ->getResultArray();
+        return $builder->get()->getResultArray();
     }
 }
