@@ -102,7 +102,7 @@ $routes->group('hse', ['namespace' => 'App\Controllers\HSE'], function($routes) 
         $routes->get('tambah', 'HseController::tambahRisiko');
         $routes->post('simpan', 'HseController::simpanRisiko');
         $routes->post('update-status/(:num)/(:segment)', 'HseController::updateStatusRisiko/$1/$2');
-        $routes->get('hapus/(:num)', 'HseController::hapusRisiko/$1');
+        $routes->post('hapus/(:num)', 'HseController::hapusRisiko/$1');
     });
     
     // Pelatihan Routes

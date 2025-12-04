@@ -1254,7 +1254,7 @@ class HseController extends BaseController
     }
 
     /**
-     * Data lingkungan yang sudah dihapus (untuk audit/recovery)
+     * Data lingkungan yang sudah dihapus (recovery)
      */
     public function dataTerhapus()
     {
