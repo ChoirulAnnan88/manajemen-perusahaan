@@ -19,10 +19,16 @@ class TransaksiController extends BaseController
             return redirect()->to('/dashboard')->with('error', 'Akses ditolak ke divisi Finance');
         }
 
+        // Hitung statistik dari model
+        $totalPemasukan = $this->transaksiModel->getTotalPemasukan();
+        $totalPengeluaran = $this->transaksiModel->getTotalPengeluaran();
+
         $data = [
             'title' => 'Transaksi Keuangan',
             'module' => 'finance',
-            'transaksi' => $this->transaksiModel->getAllTransaksi()
+            'transaksi' => $this->transaksiModel->getAllTransaksi(),
+            'total_pemasukan' => $totalPemasukan,
+            'total_pengeluaran' => $totalPengeluaran
         ];
         
         return view('finance/transaksi/dashboard', $data);
@@ -39,14 +45,14 @@ class TransaksiController extends BaseController
         $totalPengeluaran = $this->transaksiModel->getTotalPengeluaran();
 
         $data = [
-            'title' => 'Transaksi Keuangan',
+            'title' => 'Transaksi Baru',
             'module' => 'finance',
             'transaksi' => $this->transaksiModel->getAllTransaksi(),
             'total_pemasukan' => $totalPemasukan,
             'total_pengeluaran' => $totalPengeluaran
         ];
         
-        return view('finance/transaksi/dashboard', $data);
+        return view('finance/transaksi/create', $data);
     }
 
     public function store()
