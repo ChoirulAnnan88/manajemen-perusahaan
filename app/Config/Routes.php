@@ -183,8 +183,9 @@ $routes->group('finance', ['namespace' => 'App\Controllers\FINANCE'], function($
     });
 });
 
-// ========== PPIC ROUTES (DENGAN NAMESPACE BARU) ==========
+// ========== PPIC ROUTES ==========
 $routes->group('ppic', ['namespace' => 'App\Controllers\PPIC'], function($routes) {
+    // Dashboard dan modul utama
     $routes->get('/', 'PpicController::index');
     $routes->get('dashboard', 'PpicController::index');
     $routes->get('inventori', 'PpicController::inventori');
@@ -192,6 +193,51 @@ $routes->group('ppic', ['namespace' => 'App\Controllers\PPIC'], function($routes
     $routes->get('material', 'PpicController::material');
     $routes->get('pemasok', 'PpicController::pemasok');
     $routes->get('pembeli', 'PpicController::pembeli');
+    
+    // CRUD Inventori
+    $routes->get('inventori', 'InventoriController::index');
+    $routes->get('inventori/create', 'InventoriController::create');
+    $routes->post('inventori/store', 'InventoriController::store');
+    $routes->get('inventori/view/(:num)', 'InventoriController::view/$1');
+    $routes->get('inventori/edit/(:num)', 'InventoriController::edit/$1');
+    $routes->post('inventori/update/(:num)', 'InventoriController::update/$1');
+    $routes->get('inventori/delete/(:num)', 'InventoriController::delete/$1');
+    
+    // CRUD Produksi
+    $routes->get('produksi', 'ProduksiController::index');
+    $routes->get('produksi/create', 'ProduksiController::create');
+    $routes->post('produksi/store', 'ProduksiController::store');
+    $routes->get('produksi/view/(:num)', 'ProduksiController::view/$1');
+    $routes->get('produksi/edit/(:num)', 'ProduksiController::edit/$1');
+    $routes->post('produksi/update/(:num)', 'ProduksiController::update/$1');
+    $routes->get('produksi/delete/(:num)', 'ProduksiController::delete/$1');
+    
+    // CRUD Material
+    $routes->get('material', 'MaterialController::index');
+    $routes->get('material/create', 'MaterialController::create');
+    $routes->post('material/store', 'MaterialController::store');
+    $routes->get('material/view/(:num)', 'MaterialController::view/$1');
+    $routes->get('material/edit/(:num)', 'MaterialController::edit/$1');
+    $routes->post('material/update/(:num)', 'MaterialController::update/$1');
+    $routes->get('material/delete/(:num)', 'MaterialController::delete/$1');
+    
+    // CRUD Pemasok
+    $routes->get('pemasok', 'PemasokController::index');
+    $routes->get('pemasok/create', 'PemasokController::create');
+    $routes->post('pemasok/store', 'PemasokController::store');
+    $routes->get('pemasok/view/(:num)', 'PemasokController::view/$1');
+    $routes->get('pemasok/edit/(:num)', 'PemasokController::edit/$1');
+    $routes->post('pemasok/update/(:num)', 'PemasokController::update/$1');
+    $routes->get('pemasok/delete/(:num)', 'PemasokController::delete/$1');
+    
+    // CRUD Pembeli
+    $routes->get('pembeli', 'PembeliController::index');
+    $routes->get('pembeli/create', 'PembeliController::create');
+    $routes->post('pembeli/store', 'PembeliController::store');
+    $routes->get('pembeli/view/(:num)', 'PembeliController::view/$1');
+    $routes->get('pembeli/edit/(:num)', 'PembeliController::edit/$1');
+    $routes->post('pembeli/update/(:num)', 'PembeliController::update/$1');
+    $routes->get('pembeli/delete/(:num)', 'PembeliController::delete/$1');
 });
 
 // ========== PRODUKSI ROUTES (DENGAN NAMESPACE BARU) ==========
