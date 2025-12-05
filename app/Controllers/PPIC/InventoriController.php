@@ -36,14 +36,16 @@ class InventoriController extends BaseController
 
     public function store()
     {
-        // Validasi input
+        // Validasi input untuk create
         $rules = [
             'kode_item' => 'required|max_length[50]|is_unique[ppic_inventori.kode_item]',
             'nama_item' => 'required|max_length[100]',
             'kategori' => 'required|max_length[50]',
             'stok_minimal' => 'required|integer|greater_than[0]',
             'stok_aktual' => 'required|integer|greater_than_equal_to[0]',
-            'satuan' => 'required|max_length[20]'
+            'satuan' => 'required|max_length[20]',
+            'status_stok' => 'required|in_list[tersedia,habis,terbatas,expired,rusak]',
+            'status' => 'required|in_list[active,inactive]'
         ];
 
         if (!$this->validate($rules)) {
@@ -57,6 +59,8 @@ class InventoriController extends BaseController
             'stok_minimal' => $this->request->getPost('stok_minimal'),
             'stok_aktual' => $this->request->getPost('stok_aktual'),
             'satuan' => $this->request->getPost('satuan'),
+            'status_stok' => $this->request->getPost('status_stok'),
+            'status' => $this->request->getPost('status'),
             'keterangan' => $this->request->getPost('keterangan')
         ];
 
@@ -97,7 +101,7 @@ class InventoriController extends BaseController
 
     public function update($id)
     {
-        // Validasi input
+        // Validasi input dengan is_unique yang benar
         $rules = [
             'kode_item' => 'required|max_length[50]|is_unique[ppic_inventori.kode_item,id,' . $id . ']',
             'nama_item' => 'required|max_length[100]',
@@ -118,6 +122,8 @@ class InventoriController extends BaseController
             'stok_minimal' => $this->request->getPost('stok_minimal'),
             'stok_aktual' => $this->request->getPost('stok_aktual'),
             'satuan' => $this->request->getPost('satuan'),
+            'status_stok' => $this->request->getPost('status_stok'),
+            'status' => $this->request->getPost('status'),
             'keterangan' => $this->request->getPost('keterangan')
         ];
 
