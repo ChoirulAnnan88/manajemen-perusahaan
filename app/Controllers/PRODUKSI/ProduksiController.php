@@ -2,9 +2,23 @@
 namespace App\Controllers\PRODUKSI;
 
 use App\Controllers\BaseController;
+use App\Models\PRODUKSI\ProduksiModel;
+use App\Models\PRODUKSI\AlatdanBahanModel;
+use App\Models\PRODUKSI\OperatorModel;
 
 class ProduksiController extends BaseController
 {
+    protected $produksiModel;
+    protected $alatModel;
+    protected $operatorModel;
+
+    public function __construct()
+    {
+        $this->produksiModel = new ProduksiModel();
+        $this->alatModel = new AlatdanBahanModel();
+        $this->operatorModel = new OperatorModel();
+    }
+
     public function index()
     {
         if (!$this->checkDivisionAccess('produksi')) {
@@ -13,12 +27,17 @@ class ProduksiController extends BaseController
 
         $data = [
             'title' => 'Dashboard Produksi',
-            'module' => 'produksi'
+            'module' => 'produksi',
+            'total_produksi' => $this->produksiModel->countAll(),
+            'total_alat' => $this->alatModel->countAll(),
+            'total_operator' => $this->operatorModel->countAll(),
+            'produksi_hari_ini' => $this->produksiModel->getProduksiHariIni()
         ];
         
         return view('produksi/dashboard', $data);
     }
 
+    // HASIL PRODUKSI
     public function hasil()
     {
         if (!$this->checkDivisionAccess('produksi')) {
@@ -27,12 +46,158 @@ class ProduksiController extends BaseController
 
         $data = [
             'title' => 'Hasil Produksi - Produksi',
-            'module' => 'produksi'
+            'module' => 'produksi',
+            'produksi' => $this->produksiModel->getAllProduksi()
         ];
         
-        return view('produksi/hasil', $data);
+        return view('produksi/produksi/index', $data);
     }
 
+    public function createHasil()
+    {
+        if (!$this->checkDivisionAccess('produksi')) {
+            return redirect()->to('/dashboard')->with('error', 'Akses ditolak');
+        }
+
+        $data = [
+            'title' => 'Tambah Hasil Produksi',
+            'module' => 'produksi',
+            'validation' => \Config\Services::validation(),
+            'alat_list' => $this->alatModel->findAll(),
+            'operator_list' => $this->operatorModel->findAll()
+        ];
+        
+        return view('produksi/produksi/create', $data);
+    }
+
+    public function saveHasil()
+    {
+        if (!$this->checkDivisionAccess('produksi')) {
+            return redirect()->to('/dashboard')->with('error', 'Akses ditolak');
+        }
+
+        $rules = [
+            'nomor_produksi' => 'required|is_unique[produksi_hasil.nomor_produksi]',
+            'tanggal_produksi' => 'required',
+            'jumlah_hasil' => 'required|numeric',
+            'kualitas' => 'required',
+            'status_produksi' => 'required'
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $data = [
+            'nomor_produksi' => $this->request->getPost('nomor_produksi'),
+            'tanggal_produksi' => $this->request->getPost('tanggal_produksi'),
+            'jumlah_hasil' => $this->request->getPost('jumlah_hasil'),
+            'kualitas' => $this->request->getPost('kualitas'),
+            'status_produksi' => $this->request->getPost('status_produksi'),
+            'operator_id' => $this->request->getPost('operator_id'),
+            'alat_id' => $this->request->getPost('alat_id'),
+            'keterangan' => $this->request->getPost('keterangan')
+        ];
+
+        if ($this->produksiModel->save($data)) {
+            return redirect()->to('/produksi/hasil')->with('success', 'Data produksi berhasil disimpan');
+        } else {
+            return redirect()->back()->withInput()->with('error', 'Gagal menyimpan data produksi');
+        }
+    }
+
+    public function editHasil($id)
+    {
+        if (!$this->checkDivisionAccess('produksi')) {
+            return redirect()->to('/dashboard')->with('error', 'Akses ditolak');
+        }
+
+        $data = [
+            'title' => 'Edit Hasil Produksi',
+            'module' => 'produksi',
+            'validation' => \Config\Services::validation(),
+            'produksi' => $this->produksiModel->find($id),
+            'alat_list' => $this->alatModel->findAll(),
+            'operator_list' => $this->operatorModel->findAll()
+        ];
+
+        if (!$data['produksi']) {
+            return redirect()->to('/produksi/hasil')->with('error', 'Data tidak ditemukan');
+        }
+
+        return view('produksi/produksi/edit', $data);
+    }
+
+    public function updateHasil($id)
+    {
+        if (!$this->checkDivisionAccess('produksi')) {
+            return redirect()->to('/dashboard')->with('error', 'Akses ditolak');
+        }
+
+        $rules = [
+            'nomor_produksi' => "required|is_unique[produksi_hasil.nomor_produksi,id,$id]",
+            'tanggal_produksi' => 'required',
+            'jumlah_hasil' => 'required|numeric',
+            'kualitas' => 'required',
+            'status_produksi' => 'required'
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $data = [
+            'id' => $id,
+            'nomor_produksi' => $this->request->getPost('nomor_produksi'),
+            'tanggal_produksi' => $this->request->getPost('tanggal_produksi'),
+            'jumlah_hasil' => $this->request->getPost('jumlah_hasil'),
+            'kualitas' => $this->request->getPost('kualitas'),
+            'status_produksi' => $this->request->getPost('status_produksi'),
+            'operator_id' => $this->request->getPost('operator_id'),
+            'alat_id' => $this->request->getPost('alat_id'),
+            'keterangan' => $this->request->getPost('keterangan')
+        ];
+
+        if ($this->produksiModel->save($data)) {
+            return redirect()->to('/produksi/hasil')->with('success', 'Data produksi berhasil diperbarui');
+        } else {
+            return redirect()->back()->withInput()->with('error', 'Gagal memperbarui data produksi');
+        }
+    }
+
+    public function deleteHasil($id)
+    {
+        if (!$this->checkDivisionAccess('produksi')) {
+            return redirect()->to('/dashboard')->with('error', 'Akses ditolak');
+        }
+
+        if ($this->produksiModel->delete($id)) {
+            return redirect()->to('/produksi/hasil')->with('success', 'Data produksi berhasil dihapus');
+        } else {
+            return redirect()->to('/produksi/hasil')->with('error', 'Gagal menghapus data produksi');
+        }
+    }
+
+    public function viewHasil($id)
+    {
+        if (!$this->checkDivisionAccess('produksi')) {
+            return redirect()->to('/dashboard')->with('error', 'Akses ditolak');
+        }
+
+        $data = [
+            'title' => 'Detail Hasil Produksi',
+            'module' => 'produksi',
+            'produksi' => $this->produksiModel->find($id)
+        ];
+
+        if (!$data['produksi']) {
+            return redirect()->to('/produksi/hasil')->with('error', 'Data tidak ditemukan');
+        }
+
+        return view('produksi/produksi/view', $data);
+    }
+
+    // ALAT DAN BAHAN
     public function alat()
     {
         if (!$this->checkDivisionAccess('produksi')) {
@@ -41,12 +206,15 @@ class ProduksiController extends BaseController
 
         $data = [
             'title' => 'Alat dan Bahan - Produksi',
-            'module' => 'produksi'
+            'module' => 'produksi',
+            'alat_list' => $this->alatModel->getAllAlat(),
+            'material_list' => $this->alatModel->getAllMaterial()
         ];
         
-        return view('produksi/alat', $data);
+        return view('produksi/alat_dan_bahan/index', $data);
     }
 
+    // OPERATOR
     public function operator()
     {
         if (!$this->checkDivisionAccess('produksi')) {
@@ -55,10 +223,11 @@ class ProduksiController extends BaseController
 
         $data = [
             'title' => 'Operator - Produksi',
-            'module' => 'produksi'
+            'module' => 'produksi',
+            'operator_list' => $this->operatorModel->getAllOperator()
         ];
         
-        return view('produksi/operator', $data);
+        return view('produksi/operator/index', $data);
     }
 
     private function checkDivisionAccess($division)

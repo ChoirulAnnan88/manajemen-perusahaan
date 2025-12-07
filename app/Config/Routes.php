@@ -240,13 +240,46 @@ $routes->group('ppic', ['namespace' => 'App\Controllers\PPIC'], function($routes
     $routes->get('pembeli/delete/(:num)', 'PembeliController::delete/$1');
 });
 
-// ========== PRODUKSI ROUTES (DENGAN NAMESPACE BARU) ==========
-$routes->group('produksi', ['namespace' => 'App\Controllers\PRODUKSI'], function($routes) {
-    $routes->get('/', 'ProduksiController::index');
-    $routes->get('dashboard', 'ProduksiController::index');
-    $routes->get('hasil', 'ProduksiController::hasil');
-    $routes->get('alat', 'ProduksiController::alat');
-    $routes->get('operator', 'ProduksiController::operator');
+// PRODUKSI Routes
+$routes->group('produksi', function($routes) {
+    // Main Dashboard
+    $routes->get('/', 'PRODUKSI\ProduksiController::index');
+    $routes->get('dashboard', 'PRODUKSI\ProduksiController::index');
+    
+    // Hasil Produksi - CRUD
+    $routes->get('hasil', 'PRODUKSI\ProduksiController::hasil');
+    $routes->get('hasil/create', 'PRODUKSI\ProduksiController::createHasil');
+    $routes->post('hasil/save', 'PRODUKSI\ProduksiController::saveHasil');
+    $routes->get('hasil/edit/(:num)', 'PRODUKSI\ProduksiController::editHasil/$1');
+    $routes->post('hasil/update/(:num)', 'PRODUKSI\ProduksiController::updateHasil/$1');
+    $routes->get('hasil/delete/(:num)', 'PRODUKSI\ProduksiController::deleteHasil/$1');
+    $routes->get('hasil/view/(:num)', 'PRODUKSI\ProduksiController::viewHasil/$1');
+    
+    // Alat dan Bahan - CRUD
+    $routes->get('alat', 'PRODUKSI\AlatdanBahanController::index');
+    $routes->get('alat/create', 'PRODUKSI\AlatdanBahanController::createAlat');
+    $routes->post('alat/save', 'PRODUKSI\AlatdanBahanController::saveAlat');
+    $routes->get('alat/edit/(:num)', 'PRODUKSI\AlatdanBahanController::editAlat/$1');
+    $routes->post('alat/update/(:num)', 'PRODUKSI\AlatdanBahanController::updateAlat/$1');
+    $routes->get('alat/delete/(:num)', 'PRODUKSI\AlatdanBahanController::deleteAlat/$1');
+    $routes->get('alat/view/(:num)', 'PRODUKSI\AlatdanBahanController::viewAlat/$1');
+    
+    // Material - CRUD
+    $routes->get('material/create', 'PRODUKSI\AlatdanBahanController::createMaterial');
+    $routes->post('material/save', 'PRODUKSI\AlatdanBahanController::saveMaterial');
+    $routes->get('material/edit/(:num)', 'PRODUKSI\AlatdanBahanController::editMaterial/$1');
+    $routes->post('material/update/(:num)', 'PRODUKSI\AlatdanBahanController::updateMaterial/$1');
+    $routes->get('material/delete/(:num)', 'PRODUKSI\AlatdanBahanController::deleteMaterial/$1');
+    $routes->get('material/view/(:num)', 'PRODUKSI\AlatdanBahanController::viewMaterial/$1');
+    
+    // Operator - CRUD
+    $routes->get('operator', 'PRODUKSI\OperatorController::index');
+    $routes->get('operator/create', 'PRODUKSI\OperatorController::create');
+    $routes->post('operator/save', 'PRODUKSI\OperatorController::save');
+    $routes->get('operator/edit/(:num)', 'PRODUKSI\OperatorController::edit/$1');
+    $routes->post('operator/update/(:num)', 'PRODUKSI\OperatorController::update/$1');
+    $routes->get('operator/delete/(:num)', 'PRODUKSI\OperatorController::delete/$1');
+    $routes->get('operator/view/(:num)', 'PRODUKSI\OperatorController::view/$1');
 });
 
 // ========== MARKETING ROUTES (DENGAN NAMESPACE BARU) ==========
