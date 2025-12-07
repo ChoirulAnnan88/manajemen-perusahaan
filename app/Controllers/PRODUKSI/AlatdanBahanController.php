@@ -76,7 +76,8 @@ class AlatdanBahanController extends BaseController
         ];
 
         if ($this->alatModel->saveAlat($data)) {
-            return redirect()->to('/produksi/alat')->with('success', 'Alat berhasil ditambahkan');
+            // TAMBAHKAN ?tab=alat DI REDIRECT
+            return redirect()->to('/produksi/alat?tab=alat')->with('success', 'Alat berhasil ditambahkan');
         } else {
             return redirect()->back()->withInput()->with('error', 'Gagal menambahkan alat');
         }
@@ -96,7 +97,7 @@ class AlatdanBahanController extends BaseController
         ];
 
         if (!$data['alat']) {
-            return redirect()->to('/produksi/alat')->with('error', 'Alat tidak ditemukan');
+            return redirect()->to('/produksi/alat?tab=alat')->with('error', 'Alat tidak ditemukan');
         }
 
         return view('produksi/alat_dan_bahan/edit_alat', $data);
@@ -110,7 +111,7 @@ class AlatdanBahanController extends BaseController
 
         $alat = $this->alatModel->getAlatById($id);
         if (!$alat) {
-            return redirect()->to('/produksi/alat')->with('error', 'Alat tidak ditemukan');
+            return redirect()->to('/produksi/alat?tab=alat')->with('error', 'Alat tidak ditemukan');
         }
 
         $rules = [
@@ -139,7 +140,8 @@ class AlatdanBahanController extends BaseController
         ];
 
         if ($this->alatModel->updateAlat($id, $data)) {
-            return redirect()->to('/produksi/alat')->with('success', 'Alat berhasil diperbarui');
+            // TAMBAHKAN ?tab=alat DI REDIRECT
+            return redirect()->to('/produksi/alat?tab=alat')->with('success', 'Alat berhasil diperbarui');
         } else {
             return redirect()->back()->withInput()->with('error', 'Gagal memperbarui alat');
         }
@@ -152,9 +154,10 @@ class AlatdanBahanController extends BaseController
         }
 
         if ($this->alatModel->deleteAlat($id)) {
-            return redirect()->to('/produksi/alat')->with('success', 'Alat berhasil dihapus');
+            // TAMBAHKAN ?tab=alat DI REDIRECT
+            return redirect()->to('/produksi/alat?tab=alat')->with('success', 'Alat berhasil dihapus');
         } else {
-            return redirect()->to('/produksi/alat')->with('error', 'Gagal menghapus alat');
+            return redirect()->to('/produksi/alat?tab=alat')->with('error', 'Gagal menghapus alat');
         }
     }
 
@@ -171,7 +174,7 @@ class AlatdanBahanController extends BaseController
         ];
 
         if (!$data['alat']) {
-            return redirect()->to('/produksi/alat')->with('error', 'Alat tidak ditemukan');
+            return redirect()->to('/produksi/alat?tab=alat')->with('error', 'Alat tidak ditemukan');
         }
 
         return view('produksi/alat_dan_bahan/view_alat', $data);
@@ -225,7 +228,8 @@ class AlatdanBahanController extends BaseController
         ];
 
         if ($this->alatModel->saveMaterial($data)) {
-            return redirect()->to('/produksi/alat')->with('success', 'Material berhasil ditambahkan');
+            // TAMBAHKAN ?tab=material DI REDIRECT
+            return redirect()->to('/produksi/alat?tab=material')->with('success', 'Material berhasil ditambahkan');
         } else {
             return redirect()->back()->withInput()->with('error', 'Gagal menambahkan material');
         }
@@ -245,7 +249,7 @@ class AlatdanBahanController extends BaseController
         ];
 
         if (!$data['material']) {
-            return redirect()->to('/produksi/alat')->with('error', 'Material tidak ditemukan');
+            return redirect()->to('/produksi/alat?tab=material')->with('error', 'Material tidak ditemukan');
         }
 
         return view('produksi/alat_dan_bahan/edit_material', $data);
@@ -259,7 +263,7 @@ class AlatdanBahanController extends BaseController
 
         $material = $this->alatModel->getMaterialById($id);
         if (!$material) {
-            return redirect()->to('/produksi/alat')->with('error', 'Material tidak ditemukan');
+            return redirect()->to('/produksi/alat?tab=material')->with('error', 'Material tidak ditemukan');
         }
 
         $rules = [
@@ -288,7 +292,8 @@ class AlatdanBahanController extends BaseController
         ];
 
         if ($this->alatModel->updateMaterial($id, $data)) {
-            return redirect()->to('/produksi/alat')->with('success', 'Material berhasil diperbarui');
+            // TAMBAHKAN ?tab=material DI REDIRECT
+            return redirect()->to('/produksi/alat?tab=material')->with('success', 'Material berhasil diperbarui');
         } else {
             return redirect()->back()->withInput()->with('error', 'Gagal memperbarui material');
         }
@@ -301,9 +306,10 @@ class AlatdanBahanController extends BaseController
         }
 
         if ($this->alatModel->deleteMaterial($id)) {
-            return redirect()->to('/produksi/alat')->with('success', 'Material berhasil dihapus');
+            // TAMBAHKAN ?tab=material DI REDIRECT
+            return redirect()->to('/produksi/alat?tab=material')->with('success', 'Material berhasil dihapus');
         } else {
-            return redirect()->to('/produksi/alat')->with('error', 'Gagal menghapus material');
+            return redirect()->to('/produksi/alat?tab=material')->with('error', 'Gagal menghapus material');
         }
     }
 
@@ -320,7 +326,7 @@ class AlatdanBahanController extends BaseController
         ];
 
         if (!$data['material']) {
-            return redirect()->to('/produksi/alat')->with('error', 'Material tidak ditemukan');
+            return redirect()->to('/produksi/alat?tab=material')->with('error', 'Material tidak ditemukan');
         }
 
         return view('produksi/alat_dan_bahan/view_material', $data);

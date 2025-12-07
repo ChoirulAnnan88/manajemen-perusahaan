@@ -23,6 +23,20 @@ class OperatorModel extends Model
                  ->getResultArray();
     }
 
+    // FIX: Method findAll() untuk menangani panggilan dari controller
+    public function findAll($limit = null, $offset = 0)
+    {
+        $db = db_connect();
+        $builder = $db->table($this->table)
+                     ->orderBy('nama_lengkap', 'ASC');
+        
+        if ($limit !== null) {
+            $builder->limit($limit, $offset);
+        }
+        
+        return $builder->get()->getResultArray();
+    }
+
     public function getOperatorById($id)
     {
         return $this->find($id);

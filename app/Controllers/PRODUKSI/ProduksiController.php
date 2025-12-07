@@ -77,7 +77,7 @@ class ProduksiController extends BaseController
         }
 
         $rules = [
-            'nomor_produksi' => 'required|is_unique[produksi_hasil.nomor_produksi]',
+            'nomor_produksi' => 'required|is_unique[produksi_produksi.nomor_produksi]',
             'tanggal_produksi' => 'required',
             'jumlah_hasil' => 'required|numeric',
             'kualitas' => 'required',
@@ -99,7 +99,8 @@ class ProduksiController extends BaseController
             'keterangan' => $this->request->getPost('keterangan')
         ];
 
-        if ($this->produksiModel->save($data)) {
+        // GUNAKAN HELPER FUNCTION saveToProduksiTable()
+        if ($this->saveToProduksiTable($data)) {
             return redirect()->to('/produksi/hasil')->with('success', 'Data produksi berhasil disimpan');
         } else {
             return redirect()->back()->withInput()->with('error', 'Gagal menyimpan data produksi');
@@ -135,7 +136,7 @@ class ProduksiController extends BaseController
         }
 
         $rules = [
-            'nomor_produksi' => "required|is_unique[produksi_hasil.nomor_produksi,id,$id]",
+            'nomor_produksi' => "required|is_unique[produksi_produksi.nomor_produksi,id,$id]",
             'tanggal_produksi' => 'required',
             'jumlah_hasil' => 'required|numeric',
             'kualitas' => 'required',
@@ -158,7 +159,8 @@ class ProduksiController extends BaseController
             'keterangan' => $this->request->getPost('keterangan')
         ];
 
-        if ($this->produksiModel->save($data)) {
+        // GUNAKAN HELPER FUNCTION saveToProduksiTable()
+        if ($this->saveToProduksiTable($data)) {
             return redirect()->to('/produksi/hasil')->with('success', 'Data produksi berhasil diperbarui');
         } else {
             return redirect()->back()->withInput()->with('error', 'Gagal memperbarui data produksi');
@@ -171,7 +173,8 @@ class ProduksiController extends BaseController
             return redirect()->to('/dashboard')->with('error', 'Akses ditolak');
         }
 
-        if ($this->produksiModel->delete($id)) {
+        // GUNAKAN HELPER FUNCTION deleteFromProduksiTable()
+        if ($this->deleteFromProduksiTable($id)) {
             return redirect()->to('/produksi/hasil')->with('success', 'Data produksi berhasil dihapus');
         } else {
             return redirect()->to('/produksi/hasil')->with('error', 'Gagal menghapus data produksi');
@@ -197,37 +200,42 @@ class ProduksiController extends BaseController
         return view('produksi/produksi/view', $data);
     }
 
-    // ALAT DAN BAHAN
-    public function alat()
-    {
-        if (!$this->checkDivisionAccess('produksi')) {
-            return redirect()->to('/dashboard')->with('error', 'Akses ditolak');
-        }
+    // ========== HELPER FUNCTIONS ==========
 
-        $data = [
-            'title' => 'Alat dan Bahan - Produksi',
-            'module' => 'produksi',
-            'alat_list' => $this->alatModel->getAllAlat(),
-            'material_list' => $this->alatModel->getAllMaterial()
+    private function saveToProduksiTable($data)
+    {
+        $db = db_connect();
+        
+        // Map data untuk tabel produksi_produksi
+        $tableData = [
+            'nomor_produksi' => $data['nomor_produksi'],
+            'tanggal_produksi' => $data['tanggal_produksi'],
+            'jumlah_hasil' => $data['jumlah_hasil'],
+            'kualitas' => $data['kualitas'],
+            'status' => $data['status_produksi'], // Konversi: status_produksi -> status
+            'operator_id' => $data['operator_id'] ?? null,
+            'alat_id' => $data['alat_id'] ?? null,
+            'keterangan' => $data['keterangan'] ?? null
         ];
         
-        return view('produksi/alat_dan_bahan/index', $data);
+        // Jika ada ID, berarti UPDATE
+        if (isset($data['id'])) {
+            return $db->table('produksi_produksi')
+                     ->where('id', $data['id'])
+                     ->update($tableData);
+        } else {
+            // INSERT
+            return $db->table('produksi_produksi')
+                     ->insert($tableData);
+        }
     }
 
-    // OPERATOR
-    public function operator()
+    private function deleteFromProduksiTable($id)
     {
-        if (!$this->checkDivisionAccess('produksi')) {
-            return redirect()->to('/dashboard')->with('error', 'Akses ditolak');
-        }
-
-        $data = [
-            'title' => 'Operator - Produksi',
-            'module' => 'produksi',
-            'operator_list' => $this->operatorModel->getAllOperator()
-        ];
-        
-        return view('produksi/operator/index', $data);
+        $db = db_connect();
+        return $db->table('produksi_produksi')
+                 ->where('id', $id)
+                 ->delete();
     }
 
     private function checkDivisionAccess($division)

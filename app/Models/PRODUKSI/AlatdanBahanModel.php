@@ -68,6 +68,20 @@ class AlatdanBahanModel extends Model
                  ->getResultArray();
     }
 
+    // FIX: Method findAll() untuk menangani panggilan dari controller
+    public function findAll($limit = null, $offset = 0)
+    {
+        $db = db_connect();
+        $builder = $db->table($this->tableAlat)
+                     ->orderBy('nama_alat', 'ASC');
+        
+        if ($limit !== null) {
+            $builder->limit($limit, $offset);
+        }
+        
+        return $builder->get()->getResultArray();
+    }
+
     // Material Methods
     public function getAllMaterial()
     {
@@ -90,7 +104,31 @@ class AlatdanBahanModel extends Model
     public function saveMaterial($data)
     {
         $db = db_connect();
-        return $db->table($this->tableMaterial)->insert($data);
+        
+        // Nonaktifkan foreign key check sementara
+        $db->query('SET FOREIGN_KEY_CHECKS = 0');
+        
+        // Filter data
+        $filteredData = [
+            'material_id' => $data['kode_material'], // Gunakan kode sebagai material_id sementara
+            'kode_material' => $data['kode_material'],
+            'nama_material' => $data['nama_material'],
+            'spesifikasi' => $data['spesifikasi'] ?? null,
+            'stok_aktual' => $data['stok_aktual'] ?? 0,
+            'stok_minimal' => $data['stok_minimal'] ?? 10,
+            'satuan' => $data['satuan'] ?? 'pcs',
+            'harga_satuan' => $data['harga_satuan'] ?? 0,
+            'status_stok' => $data['status_stok'] ?? 'tersedia',
+            'lokasi' => $data['lokasi'] ?? 'Gudang Material Produksi',
+            'keterangan' => $data['keterangan'] ?? null
+        ];
+        
+        $result = $db->table($this->tableMaterial)->insert($filteredData);
+        
+        // Aktifkan kembali foreign key check
+        $db->query('SET FOREIGN_KEY_CHECKS = 1');
+        
+        return $result;
     }
 
     public function updateMaterial($id, $data)
