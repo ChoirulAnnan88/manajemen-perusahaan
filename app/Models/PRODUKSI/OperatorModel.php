@@ -7,91 +7,30 @@ class OperatorModel extends Model
 {
     protected $table = 'produksi_operator';
     protected $primaryKey = 'id';
-    protected $allowedFields = ['user_id', 'username', 'nama_lengkap', 'email', 'nip', 'status_kerja', 'alat_id', 'keterangan'];
+    protected $allowedFields = [
+        'user_id', 'username', 'nama_lengkap', 'email', 'nip',
+        'status_kerja', 'alat_id', 'keterangan'
+    ];
     protected $useTimestamps = true;
-    protected $createdField = 'created_at';
-    protected $updatedField = 'updated_at';
+    protected $dateFormat = 'datetime';
 
-    public function getAllOperator()
+    public function getOperators($limit = null)
     {
-        $db = db_connect();
-        return $db->table($this->table)
-                 ->select('produksi_operator.*, produksi_alat.nama_alat')
-                 ->join('produksi_alat', 'produksi_alat.id = produksi_operator.alat_id', 'left')
-                 ->orderBy('produksi_operator.nama_lengkap', 'ASC')
-                 ->get()
-                 ->getResultArray();
-    }
-
-    // FIX: Method findAll() untuk menangani panggilan dari controller
-    public function findAll($limit = null, $offset = 0)
-    {
-        $db = db_connect();
-        $builder = $db->table($this->table)
-                     ->orderBy('nama_lengkap', 'ASC');
+        $builder = $this->select('produksi_operator.*, produksi_alat.nama_alat')
+            ->join('produksi_alat', 'produksi_alat.id = produksi_operator.alat_id', 'left');
         
-        if ($limit !== null) {
-            $builder->limit($limit, $offset);
+        if ($limit) {
+            $builder->limit($limit);
         }
         
-        return $builder->get()->getResultArray();
+        return $builder->orderBy('produksi_operator.created_at', 'DESC')->findAll();
     }
 
-    public function getOperatorById($id)
+    public function getOperator($id)
     {
-        return $this->find($id);
-    }
-
-    public function getOperatorWithAlat($id)
-    {
-        $db = db_connect();
-        return $db->table($this->table)
-                 ->select('produksi_operator.*, produksi_alat.nama_alat, produksi_alat.kode_alat, produksi_alat.tipe, produksi_alat.kondisi')
-                 ->join('produksi_alat', 'produksi_alat.id = produksi_operator.alat_id', 'left')
-                 ->where('produksi_operator.id', $id)
-                 ->get()
-                 ->getRowArray();
-    }
-
-    public function getOperatorByStatus($status)
-    {
-        return $this->where('status_kerja', $status)->findAll();
-    }
-
-    public function countOperatorByStatus($status)
-    {
-        return $this->where('status_kerja', $status)->countAllResults();
-    }
-
-    public function getOperatorDashboardStats()
-    {
-        $db = db_connect();
-        $query = $db->query("
-            SELECT 
-                status_kerja,
-                COUNT(*) as total
-            FROM produksi_operator
-            GROUP BY status_kerja
-        ");
-        
-        return $query->getResultArray();
-    }
-
-    public function searchOperator($keyword)
-    {
-        return $this->like('nama_lengkap', $keyword)
-                   ->orLike('nip', $keyword)
-                   ->orLike('email', $keyword)
-                   ->findAll();
-    }
-
-    public function countAll()
-    {
-        return $this->countAllResults();
-    }
-
-    public function getActiveOperators()
-    {
-        return $this->where('status_kerja', 'aktif')->findAll();
+        return $this->select('produksi_operator.*, produksi_alat.nama_alat, produksi_alat.kode_alat')
+            ->join('produksi_alat', 'produksi_alat.id = produksi_operator.alat_id', 'left')
+            ->where('produksi_operator.id', $id)
+            ->first();
     }
 }

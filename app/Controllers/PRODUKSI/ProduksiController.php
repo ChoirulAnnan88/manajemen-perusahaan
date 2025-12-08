@@ -3,239 +3,24 @@ namespace App\Controllers\PRODUKSI;
 
 use App\Controllers\BaseController;
 use App\Models\PRODUKSI\ProduksiModel;
-use App\Models\PRODUKSI\AlatdanBahanModel;
 use App\Models\PRODUKSI\OperatorModel;
+use App\Models\PRODUKSI\AlatdanBahanModel;
 
 class ProduksiController extends BaseController
 {
     protected $produksiModel;
-    protected $alatModel;
     protected $operatorModel;
+    protected $alatModel;
 
     public function __construct()
     {
         $this->produksiModel = new ProduksiModel();
-        $this->alatModel = new AlatdanBahanModel();
         $this->operatorModel = new OperatorModel();
-    }
-
-    public function index()
-    {
+        $this->alatModel = new AlatdanBahanModel();
+        
         if (!$this->checkDivisionAccess('produksi')) {
             return redirect()->to('/dashboard')->with('error', 'Akses ditolak ke divisi Produksi');
         }
-
-        $data = [
-            'title' => 'Dashboard Produksi',
-            'module' => 'produksi',
-            'total_produksi' => $this->produksiModel->countAll(),
-            'total_alat' => $this->alatModel->countAll(),
-            'total_operator' => $this->operatorModel->countAll(),
-            'produksi_hari_ini' => $this->produksiModel->getProduksiHariIni()
-        ];
-        
-        return view('produksi/dashboard', $data);
-    }
-
-    // HASIL PRODUKSI
-    public function hasil()
-    {
-        if (!$this->checkDivisionAccess('produksi')) {
-            return redirect()->to('/dashboard')->with('error', 'Akses ditolak');
-        }
-
-        $data = [
-            'title' => 'Hasil Produksi - Produksi',
-            'module' => 'produksi',
-            'produksi' => $this->produksiModel->getAllProduksi()
-        ];
-        
-        return view('produksi/produksi/index', $data);
-    }
-
-    public function createHasil()
-    {
-        if (!$this->checkDivisionAccess('produksi')) {
-            return redirect()->to('/dashboard')->with('error', 'Akses ditolak');
-        }
-
-        $data = [
-            'title' => 'Tambah Hasil Produksi',
-            'module' => 'produksi',
-            'validation' => \Config\Services::validation(),
-            'alat_list' => $this->alatModel->findAll(),
-            'operator_list' => $this->operatorModel->findAll()
-        ];
-        
-        return view('produksi/produksi/create', $data);
-    }
-
-    public function saveHasil()
-    {
-        if (!$this->checkDivisionAccess('produksi')) {
-            return redirect()->to('/dashboard')->with('error', 'Akses ditolak');
-        }
-
-        $rules = [
-            'nomor_produksi' => 'required|is_unique[produksi_produksi.nomor_produksi]',
-            'tanggal_produksi' => 'required',
-            'jumlah_hasil' => 'required|numeric',
-            'kualitas' => 'required',
-            'status_produksi' => 'required'
-        ];
-
-        if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
-        }
-
-        $data = [
-            'nomor_produksi' => $this->request->getPost('nomor_produksi'),
-            'tanggal_produksi' => $this->request->getPost('tanggal_produksi'),
-            'jumlah_hasil' => $this->request->getPost('jumlah_hasil'),
-            'kualitas' => $this->request->getPost('kualitas'),
-            'status_produksi' => $this->request->getPost('status_produksi'),
-            'operator_id' => $this->request->getPost('operator_id'),
-            'alat_id' => $this->request->getPost('alat_id'),
-            'keterangan' => $this->request->getPost('keterangan')
-        ];
-
-        // GUNAKAN HELPER FUNCTION saveToProduksiTable()
-        if ($this->saveToProduksiTable($data)) {
-            return redirect()->to('/produksi/hasil')->with('success', 'Data produksi berhasil disimpan');
-        } else {
-            return redirect()->back()->withInput()->with('error', 'Gagal menyimpan data produksi');
-        }
-    }
-
-    public function editHasil($id)
-    {
-        if (!$this->checkDivisionAccess('produksi')) {
-            return redirect()->to('/dashboard')->with('error', 'Akses ditolak');
-        }
-
-        $data = [
-            'title' => 'Edit Hasil Produksi',
-            'module' => 'produksi',
-            'validation' => \Config\Services::validation(),
-            'produksi' => $this->produksiModel->find($id),
-            'alat_list' => $this->alatModel->findAll(),
-            'operator_list' => $this->operatorModel->findAll()
-        ];
-
-        if (!$data['produksi']) {
-            return redirect()->to('/produksi/hasil')->with('error', 'Data tidak ditemukan');
-        }
-
-        return view('produksi/produksi/edit', $data);
-    }
-
-    public function updateHasil($id)
-    {
-        if (!$this->checkDivisionAccess('produksi')) {
-            return redirect()->to('/dashboard')->with('error', 'Akses ditolak');
-        }
-
-        $rules = [
-            'nomor_produksi' => "required|is_unique[produksi_produksi.nomor_produksi,id,$id]",
-            'tanggal_produksi' => 'required',
-            'jumlah_hasil' => 'required|numeric',
-            'kualitas' => 'required',
-            'status_produksi' => 'required'
-        ];
-
-        if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
-        }
-
-        $data = [
-            'id' => $id,
-            'nomor_produksi' => $this->request->getPost('nomor_produksi'),
-            'tanggal_produksi' => $this->request->getPost('tanggal_produksi'),
-            'jumlah_hasil' => $this->request->getPost('jumlah_hasil'),
-            'kualitas' => $this->request->getPost('kualitas'),
-            'status_produksi' => $this->request->getPost('status_produksi'),
-            'operator_id' => $this->request->getPost('operator_id'),
-            'alat_id' => $this->request->getPost('alat_id'),
-            'keterangan' => $this->request->getPost('keterangan')
-        ];
-
-        // GUNAKAN HELPER FUNCTION saveToProduksiTable()
-        if ($this->saveToProduksiTable($data)) {
-            return redirect()->to('/produksi/hasil')->with('success', 'Data produksi berhasil diperbarui');
-        } else {
-            return redirect()->back()->withInput()->with('error', 'Gagal memperbarui data produksi');
-        }
-    }
-
-    public function deleteHasil($id)
-    {
-        if (!$this->checkDivisionAccess('produksi')) {
-            return redirect()->to('/dashboard')->with('error', 'Akses ditolak');
-        }
-
-        // GUNAKAN HELPER FUNCTION deleteFromProduksiTable()
-        if ($this->deleteFromProduksiTable($id)) {
-            return redirect()->to('/produksi/hasil')->with('success', 'Data produksi berhasil dihapus');
-        } else {
-            return redirect()->to('/produksi/hasil')->with('error', 'Gagal menghapus data produksi');
-        }
-    }
-
-    public function viewHasil($id)
-    {
-        if (!$this->checkDivisionAccess('produksi')) {
-            return redirect()->to('/dashboard')->with('error', 'Akses ditolak');
-        }
-
-        $data = [
-            'title' => 'Detail Hasil Produksi',
-            'module' => 'produksi',
-            'produksi' => $this->produksiModel->find($id)
-        ];
-
-        if (!$data['produksi']) {
-            return redirect()->to('/produksi/hasil')->with('error', 'Data tidak ditemukan');
-        }
-
-        return view('produksi/produksi/view', $data);
-    }
-
-    // ========== HELPER FUNCTIONS ==========
-
-    private function saveToProduksiTable($data)
-    {
-        $db = db_connect();
-        
-        // Map data untuk tabel produksi_produksi
-        $tableData = [
-            'nomor_produksi' => $data['nomor_produksi'],
-            'tanggal_produksi' => $data['tanggal_produksi'],
-            'jumlah_hasil' => $data['jumlah_hasil'],
-            'kualitas' => $data['kualitas'],
-            'status' => $data['status_produksi'], // Konversi: status_produksi -> status
-            'operator_id' => $data['operator_id'] ?? null,
-            'alat_id' => $data['alat_id'] ?? null,
-            'keterangan' => $data['keterangan'] ?? null
-        ];
-        
-        // Jika ada ID, berarti UPDATE
-        if (isset($data['id'])) {
-            return $db->table('produksi_produksi')
-                     ->where('id', $data['id'])
-                     ->update($tableData);
-        } else {
-            // INSERT
-            return $db->table('produksi_produksi')
-                     ->insert($tableData);
-        }
-    }
-
-    private function deleteFromProduksiTable($id)
-    {
-        $db = db_connect();
-        return $db->table('produksi_produksi')
-                 ->where('id', $id)
-                 ->delete();
     }
 
     private function checkDivisionAccess($division)
@@ -248,7 +33,7 @@ class ProduksiController extends BaseController
             'hrga' => 1,
             'hse' => 2,
             'finance' => 3,
-            'ppic' => 4, 
+            'ppic' => 4,
             'produksi' => 5,
             'marketing' => 6
         ];
@@ -258,5 +43,160 @@ class ProduksiController extends BaseController
         }
 
         return isset($divisionMap[$division]) && $userDivisi == $divisionMap[$division];
+    }
+
+    public function index()
+    {
+        $data = [
+            'title' => 'Data Produksi',
+            'produksi' => $this->produksiModel->getProduksi(),
+            'module' => 'produksi'
+        ];
+        return view('produksi/produksi/index', $data);
+    }
+
+    public function view($id)
+    {
+        $produksi = $this->produksiModel->getProduksi($id);
+        if (!$produksi) {
+            return redirect()->to('/produksi/hasil')->with('error', 'Data produksi tidak ditemukan');
+        }
+
+        $data = [
+            'title' => 'Detail Produksi',
+            'produksi' => $produksi,
+            'module' => 'produksi'
+        ];
+        return view('produksi/produksi/view', $data);
+    }
+
+    public function create()
+    {
+        $data = [
+            'title' => 'Tambah Produksi',
+            'operators' => $this->operatorModel->getOperators(),
+            'alats' => $this->alatModel->getAlat(),
+            'module' => 'produksi'
+        ];
+        return view('produksi/produksi/create', $data);
+    }
+
+    public function store()
+    {
+        $rules = [
+            'nomor_produksi' => 'required|is_unique[produksi_hasil.nomor_produksi]',
+            'tanggal_produksi' => 'required|valid_date',
+            'jumlah_hasil' => 'required|integer|greater_than[0]',
+            'kualitas' => 'required|in_list[baik,cacat_ringan,cacat_berat]',
+            'status_produksi' => 'required|in_list[planned,progress,completed,canceled]',
+            'operator_id' => 'permit_empty|integer',
+            'alat_id' => 'permit_empty|integer',
+            'keterangan' => 'permit_empty|string'
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $data = [
+            'nomor_produksi' => $this->request->getPost('nomor_produksi'),
+            'tanggal_produksi' => $this->request->getPost('tanggal_produksi'),
+            'jumlah_hasil' => $this->request->getPost('jumlah_hasil'),
+            'kualitas' => $this->request->getPost('kualitas'),
+            'status_produksi' => $this->request->getPost('status_produksi'),
+            'operator_id' => $this->request->getPost('operator_id') ?: null,
+            'alat_id' => $this->request->getPost('alat_id') ?: null,
+            'keterangan' => $this->request->getPost('keterangan')
+        ];
+
+        if ($this->produksiModel->insert($data)) {
+            return redirect()->to('/produksi/hasil')->with('success', 'Data produksi berhasil ditambahkan');
+        }
+
+        return redirect()->back()->withInput()->with('error', 'Gagal menambahkan data produksi');
+    }
+
+    public function edit($id)
+    {
+        $produksi = $this->produksiModel->find($id);
+        if (!$produksi) {
+            return redirect()->to('/produksi/hasil')->with('error', 'Data produksi tidak ditemukan');
+        }
+
+        $data = [
+            'title' => 'Edit Produksi',
+            'produksi' => $produksi,
+            'operators' => $this->operatorModel->getOperators(),
+            'alats' => $this->alatModel->getAlat(),
+            'module' => 'produksi'
+        ];
+        return view('produksi/produksi/edit', $data);
+    }
+
+    public function update($id)
+    {
+        $produksi = $this->produksiModel->find($id);
+        if (!$produksi) {
+            return redirect()->to('/produksi/hasil')->with('error', 'Data produksi tidak ditemukan');
+        }
+
+        $rules = [
+            'nomor_produksi' => "required|is_unique[produksi_hasil.nomor_produksi,id,{$id}]",
+            'tanggal_produksi' => 'required|valid_date',
+            'jumlah_hasil' => 'required|integer|greater_than[0]',
+            'kualitas' => 'required|in_list[baik,cacat_ringan,cacat_berat]',
+            'status_produksi' => 'required|in_list[planned,progress,completed,canceled]',
+            'operator_id' => 'permit_empty|integer',
+            'alat_id' => 'permit_empty|integer',
+            'keterangan' => 'permit_empty|string'
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $data = [
+            'nomor_produksi' => $this->request->getPost('nomor_produksi'),
+            'tanggal_produksi' => $this->request->getPost('tanggal_produksi'),
+            'jumlah_hasil' => $this->request->getPost('jumlah_hasil'),
+            'kualitas' => $this->request->getPost('kualitas'),
+            'status_produksi' => $this->request->getPost('status_produksi'),
+            'operator_id' => $this->request->getPost('operator_id') ?: null,
+            'alat_id' => $this->request->getPost('alat_id') ?: null,
+            'keterangan' => $this->request->getPost('keterangan')
+        ];
+
+        if ($this->produksiModel->update($id, $data)) {
+            return redirect()->to('/produksi/hasil')->with('success', 'Data produksi berhasil diupdate');
+        }
+
+        return redirect()->back()->withInput()->with('error', 'Gagal mengupdate data produksi');
+    }
+
+    public function delete($id)
+    {
+        $produksi = $this->produksiModel->find($id);
+        if (!$produksi) {
+            return redirect()->to('/produksi/hasil')->with('error', 'Data produksi tidak ditemukan');
+        }
+
+        if ($this->produksiModel->delete($id)) {
+            return redirect()->to('/produksi/hasil')->with('success', 'Data produksi berhasil dihapus');
+        }
+
+        return redirect()->to('/produksi/hasil')->with('error', 'Gagal menghapus data produksi');
+    }
+
+    public function dashboard()
+    {
+        $today = date('Y-m-d');
+        $data = [
+            'title' => 'Dashboard Produksi',
+            'total_produksi' => $this->produksiModel->countAll(),
+            'total_hari_ini' => $this->produksiModel->where('tanggal_produksi', $today)->countAllResults(),
+            'produksi_hari_ini' => $this->produksiModel->where('tanggal_produksi', $today)->orderBy('created_at', 'DESC')->findAll(5),
+            'module' => 'produksi'
+        ];
+        return view('produksi/produksi/dashboard', $data);
     }
 }

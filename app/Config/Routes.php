@@ -189,7 +189,7 @@ $routes->group('ppic', ['namespace' => 'App\Controllers\PPIC'], function($routes
     $routes->get('/', 'PpicController::index');
     $routes->get('dashboard', 'PpicController::index');
     $routes->get('inventori', 'PpicController::inventori');
-    $routes->get('produksi', 'PpicController::produksi');
+    $routes->get('produksi', 'ProduksiController::index');
     $routes->get('material', 'PpicController::material');
     $routes->get('pemasok', 'PpicController::pemasok');
     $routes->get('pembeli', 'PpicController::pembeli');
@@ -203,7 +203,8 @@ $routes->group('ppic', ['namespace' => 'App\Controllers\PPIC'], function($routes
     $routes->post('inventori/update/(:num)', 'InventoriController::update/$1');
     $routes->get('inventori/delete/(:num)', 'InventoriController::delete/$1');
     
-    // CRUD Produksi
+    // ========== PPIC PRODUKSI ROUTES ==========
+    // Routes untuk PPIC Produksi (HAPUS group dalam group)
     $routes->get('produksi', 'ProduksiController::index');
     $routes->get('produksi/create', 'ProduksiController::create');
     $routes->post('produksi/store', 'ProduksiController::store');
@@ -211,6 +212,7 @@ $routes->group('ppic', ['namespace' => 'App\Controllers\PPIC'], function($routes
     $routes->get('produksi/edit/(:num)', 'ProduksiController::edit/$1');
     $routes->post('produksi/update/(:num)', 'ProduksiController::update/$1');
     $routes->get('produksi/delete/(:num)', 'ProduksiController::delete/$1');
+    $routes->post('produksi/update-progress/(:num)', 'ProduksiController::updateProgress/$1');
     
     // CRUD Material
     $routes->get('material', 'MaterialController::index');
@@ -240,46 +242,65 @@ $routes->group('ppic', ['namespace' => 'App\Controllers\PPIC'], function($routes
     $routes->get('pembeli/delete/(:num)', 'PembeliController::delete/$1');
 });
 
-// PRODUKSI Routes
+// ========== PRODUKSI DIVISI ROUTES (TERPISAH) ==========
+$routes->group('produksi', ['namespace' => 'App\Controllers\PRODUKSI'], function($routes) {
+    $routes->get('/', 'ProduksiMainController::index'); // Dashboard Produksi divisi
+    $routes->get('hasil', 'ProduksiController::index'); // Data Hasil Produksi aktual
+    $routes->get('hasil/create', 'ProduksiController::create');
+    $routes->post('hasil/store', 'ProduksiController::store');
+    $routes->get('hasil/view/(:num)', 'ProduksiController::view/$1');
+    $routes->get('hasil/edit/(:num)', 'ProduksiController::edit/$1');
+    $routes->post('hasil/update/(:num)', 'ProduksiController::update/$1');
+    $routes->get('hasil/delete/(:num)', 'ProduksiController::delete/$1');
+});
+
 $routes->group('produksi', function($routes) {
-    // Main Dashboard
-    $routes->get('/', 'PRODUKSI\ProduksiController::index');
-    $routes->get('dashboard', 'PRODUKSI\ProduksiController::index');
+    $routes->get('/', 'PRODUKSI\ProduksiMainController::index');
     
-    // Hasil Produksi - CRUD
-    $routes->get('hasil', 'PRODUKSI\ProduksiController::hasil');
-    $routes->get('hasil/create', 'PRODUKSI\ProduksiController::createHasil');
-    $routes->post('hasil/save', 'PRODUKSI\ProduksiController::saveHasil');
-    $routes->get('hasil/edit/(:num)', 'PRODUKSI\ProduksiController::editHasil/$1');
-    $routes->post('hasil/update/(:num)', 'PRODUKSI\ProduksiController::updateHasil/$1');
-    $routes->get('hasil/delete/(:num)', 'PRODUKSI\ProduksiController::deleteHasil/$1');
-    $routes->get('hasil/view/(:num)', 'PRODUKSI\ProduksiController::viewHasil/$1');
+    // Produksi Hasil
+    $routes->group('hasil', function($routes) {
+        $routes->get('/', 'PRODUKSI\ProduksiController::index');
+        $routes->get('dashboard', 'PRODUKSI\ProduksiController::dashboard');
+        $routes->get('view/(:num)', 'PRODUKSI\ProduksiController::view/$1');
+        $routes->get('create', 'PRODUKSI\ProduksiController::create');
+        $routes->post('store', 'PRODUKSI\ProduksiController::store');
+        $routes->get('edit/(:num)', 'PRODUKSI\ProduksiController::edit/$1');
+        $routes->post('update/(:num)', 'PRODUKSI\ProduksiController::update/$1');
+        $routes->get('delete/(:num)', 'PRODUKSI\ProduksiController::delete/$1');
+    });
     
-    // Alat dan Bahan - CRUD
-    $routes->get('alat', 'PRODUKSI\AlatdanBahanController::index');
-    $routes->get('alat/create', 'PRODUKSI\AlatdanBahanController::createAlat');
-    $routes->post('alat/save', 'PRODUKSI\AlatdanBahanController::saveAlat');
-    $routes->get('alat/edit/(:num)', 'PRODUKSI\AlatdanBahanController::editAlat/$1');
-    $routes->post('alat/update/(:num)', 'PRODUKSI\AlatdanBahanController::updateAlat/$1');
-    $routes->get('alat/delete/(:num)', 'PRODUKSI\AlatdanBahanController::deleteAlat/$1');
-    $routes->get('alat/view/(:num)', 'PRODUKSI\AlatdanBahanController::viewAlat/$1');
+    // Alat dan Bahan
+    $routes->group('alat', function($routes) {
+        $routes->get('/', 'PRODUKSI\AlatdanBahanController::index');
+        $routes->get('dashboard', 'PRODUKSI\AlatdanBahanController::dashboard');
+        $routes->get('view/(:num)', 'PRODUKSI\AlatdanBahanController::viewAlat/$1');
+        $routes->get('create', 'PRODUKSI\AlatdanBahanController::createAlat');
+        $routes->post('store', 'PRODUKSI\AlatdanBahanController::storeAlat');
+        $routes->get('edit/(:num)', 'PRODUKSI\AlatdanBahanController::editAlat/$1');
+        $routes->post('update/(:num)', 'PRODUKSI\AlatdanBahanController::updateAlat/$1');
+        $routes->get('delete/(:num)', 'PRODUKSI\AlatdanBahanController::deleteAlat/$1');
+        
+        // Material
+        $routes->get('material/create', 'PRODUKSI\AlatdanBahanController::createMaterial');
+        $routes->post('material/store', 'PRODUKSI\AlatdanBahanController::storeMaterial');
+        $routes->get('material/view/(:num)', 'PRODUKSI\AlatdanBahanController::viewMaterial/$1');
+        $routes->get('material/edit/(:num)', 'PRODUKSI\AlatdanBahanController::editMaterial/$1');
+        $routes->post('material/update/(:num)', 'PRODUKSI\AlatdanBahanController::updateMaterial/$1');
+        $routes->get('material/delete/(:num)', 'PRODUKSI\AlatdanBahanController::deleteMaterial/$1');
+        $routes->get('material/sync/(:num)', 'PRODUKSI\AlatdanBahanController::syncMaterial/$1');
+    });
     
-    // Material - CRUD
-    $routes->get('material/create', 'PRODUKSI\AlatdanBahanController::createMaterial');
-    $routes->post('material/save', 'PRODUKSI\AlatdanBahanController::saveMaterial');
-    $routes->get('material/edit/(:num)', 'PRODUKSI\AlatdanBahanController::editMaterial/$1');
-    $routes->post('material/update/(:num)', 'PRODUKSI\AlatdanBahanController::updateMaterial/$1');
-    $routes->get('material/delete/(:num)', 'PRODUKSI\AlatdanBahanController::deleteMaterial/$1');
-    $routes->get('material/view/(:num)', 'PRODUKSI\AlatdanBahanController::viewMaterial/$1');
-    
-    // Operator - CRUD
-    $routes->get('operator', 'PRODUKSI\OperatorController::index');
-    $routes->get('operator/create', 'PRODUKSI\OperatorController::create');
-    $routes->post('operator/save', 'PRODUKSI\OperatorController::save');
-    $routes->get('operator/edit/(:num)', 'PRODUKSI\OperatorController::edit/$1');
-    $routes->post('operator/update/(:num)', 'PRODUKSI\OperatorController::update/$1');
-    $routes->get('operator/delete/(:num)', 'PRODUKSI\OperatorController::delete/$1');
-    $routes->get('operator/view/(:num)', 'PRODUKSI\OperatorController::view/$1');
+    // Operator
+    $routes->group('operator', function($routes) {
+        $routes->get('/', 'PRODUKSI\OperatorController::index');
+        $routes->get('dashboard', 'PRODUKSI\OperatorController::dashboard');
+        $routes->get('view/(:num)', 'PRODUKSI\OperatorController::view/$1');
+        $routes->get('create', 'PRODUKSI\OperatorController::create');
+        $routes->post('store', 'PRODUKSI\OperatorController::store');
+        $routes->get('edit/(:num)', 'PRODUKSI\OperatorController::edit/$1');
+        $routes->post('update/(:num)', 'PRODUKSI\OperatorController::update/$1');
+        $routes->get('delete/(:num)', 'PRODUKSI\OperatorController::delete/$1');
+    });
 });
 
 // ========== MARKETING ROUTES (DENGAN NAMESPACE BARU) ==========
@@ -409,4 +430,5 @@ $routes->set404Override(function() {
     </html>';
     
     return $html;
+    
 });
