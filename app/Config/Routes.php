@@ -294,15 +294,12 @@ $routes->group('produksi', function($routes) {
         $routes->get('edit/(:num)', 'PRODUKSI\AlatdanBahanController::editAlat/$1');
         $routes->post('update/(:num)', 'PRODUKSI\AlatdanBahanController::updateAlat/$1');
         $routes->get('delete/(:num)', 'PRODUKSI\AlatdanBahanController::deleteAlat/$1');
-        
-        // Material
-        $routes->get('material/create', 'PRODUKSI\AlatdanBahanController::createMaterial');
-        $routes->post('material/store', 'PRODUKSI\AlatdanBahanController::storeMaterial');
-        $routes->get('material/view/(:num)', 'PRODUKSI\AlatdanBahanController::viewMaterial/$1');
-        $routes->get('material/edit/(:num)', 'PRODUKSI\AlatdanBahanController::editMaterial/$1');
-        $routes->post('material/update/(:num)', 'PRODUKSI\AlatdanBahanController::updateMaterial/$1');
-        $routes->get('material/delete/(:num)', 'PRODUKSI\AlatdanBahanController::deleteMaterial/$1');
-        $routes->get('material/sync/(:num)', 'PRODUKSI\AlatdanBahanController::syncMaterial/$1');
+    });
+
+        // Material Routes
+    $routes->group('material', function($routes) {
+        $routes->get('sync/(:num)', 'PRODUKSI\AlatdanBahanController::syncMaterial/$1');
+        $routes->post('updateStok', 'PRODUKSI\AlatdanBahanController::updateStokBahan'); // ✅
     });
     
     // Operator
