@@ -249,7 +249,10 @@ $routes->group('produksi/sync', ['namespace' => 'App\Controllers\PRODUKSI'], fun
     $routes->get('create', 'ProduksiSyncController::create');
     $routes->post('store', 'ProduksiSyncController::store');
     $routes->get('view/(:num)', 'ProduksiSyncController::view/$1');
+    $routes->get('edit/(:num)', 'ProduksiSyncController::edit/$1'); // TAMBAHKAN INI
+    $routes->post('update/(:num)', 'ProduksiSyncController::update/$1'); // TAMBAHKAN INI
     $routes->get('delete/(:num)', 'ProduksiSyncController::delete/$1');
+    $routes->get('status/(:num)/(:any)', 'ProduksiSyncController::updateStatus/$1/$2');
     $routes->get('ajax/ppic/(:num)', 'ProduksiSyncController::ajaxGetPpicDetail/$1');
     $routes->get('ajax/material/(:num)', 'ProduksiSyncController::ajaxGetMaterialStock/$1');
 });
