@@ -242,6 +242,18 @@ $routes->group('ppic', ['namespace' => 'App\Controllers\PPIC'], function($routes
     $routes->get('pembeli/delete/(:num)', 'PembeliController::delete/$1');
 });
 
+
+// Produksi Sync dengan PPIC Routes
+$routes->group('produksi/sync', ['namespace' => 'App\Controllers\PRODUKSI'], function($routes) {
+    $routes->get('/', 'ProduksiSyncController::index');
+    $routes->get('create', 'ProduksiSyncController::create');
+    $routes->post('store', 'ProduksiSyncController::store');
+    $routes->get('view/(:num)', 'ProduksiSyncController::view/$1');
+    $routes->get('delete/(:num)', 'ProduksiSyncController::delete/$1');
+    $routes->get('ajax/ppic/(:num)', 'ProduksiSyncController::ajaxGetPpicDetail/$1');
+    $routes->get('ajax/material/(:num)', 'ProduksiSyncController::ajaxGetMaterialStock/$1');
+});
+
 // ========== PRODUKSI DIVISI ROUTES (TERPISAH) ==========
 $routes->group('produksi', ['namespace' => 'App\Controllers\PRODUKSI'], function($routes) {
     $routes->get('/', 'ProduksiMainController::index'); // Dashboard Produksi divisi
